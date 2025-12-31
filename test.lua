@@ -31,15 +31,105 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
+-- Intro overlay (welcome + loading)
+local function playIntro()
+    local introFrame = Instance.new("Frame")
+    introFrame.Size = UDim2.fromScale(1, 1)
+    introFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
+    introFrame.BorderSizePixel = 0
+    introFrame.ZIndex = 100
+    introFrame.Parent = screenGui
+
+    local introGradient = Instance.new("UIGradient")
+    introGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 32, 60)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 24))
+    }
+    introGradient.Rotation = 120
+    introGradient.Parent = introFrame
+
+    local introTitle = Instance.new("TextLabel")
+    introTitle.Size = UDim2.new(1, 0, 0, 40)
+    introTitle.Position = UDim2.new(0, 0, 0.4, -20)
+    introTitle.BackgroundTransparency = 1
+    introTitle.Text = "ยินดีต้อนรับสู่ Thai Exploit Premium"
+    introTitle.TextColor3 = Color3.fromRGB(170, 230, 255)
+    introTitle.TextTransparency = 1
+    introTitle.TextSize = 22
+    introTitle.Font = Enum.Font.GothamBold
+    introTitle.ZIndex = 101
+    introTitle.Parent = introFrame
+
+    local introSubtitle = Instance.new("TextLabel")
+    introSubtitle.Size = UDim2.new(1, 0, 0, 22)
+    introSubtitle.Position = UDim2.new(0, 0, 0.4, 20)
+    introSubtitle.BackgroundTransparency = 1
+    introSubtitle.Text = "กำลังเตรียม UI และฟังก์ชัน..."
+    introSubtitle.TextColor3 = Color3.fromRGB(180, 200, 220)
+    introSubtitle.TextTransparency = 1
+    introSubtitle.TextSize = 16
+    introSubtitle.Font = Enum.Font.Gotham
+    introSubtitle.ZIndex = 101
+    introSubtitle.Parent = introFrame
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(0, 320, 0, 8)
+    bar.Position = UDim2.new(0.5, -160, 0.55, -4)
+    bar.BackgroundColor3 = Color3.fromRGB(35, 70, 120)
+    bar.BackgroundTransparency = 0.5
+    bar.BorderSizePixel = 0
+    bar.ZIndex = 101
+    bar.Parent = introFrame
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = bar
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new(0, 0, 1, 0)
+    fill.Position = UDim2.new(0, 0, 0, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+    fill.BackgroundTransparency = 0.1
+    fill.BorderSizePixel = 0
+    fill.ZIndex = 102
+    fill.Parent = bar
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
+
+    tween(introTitle, {TextTransparency = 0}, 0.3)
+    tween(introSubtitle, {TextTransparency = 0}, 0.35)
+    tween(fill, {Size = UDim2.new(1, 0, 1, 0)}, 1.05)
+
+    task.spawn(function()
+        task.wait(1.2)
+        tween(introTitle, {TextTransparency = 1}, 0.35)
+        tween(introSubtitle, {TextTransparency = 1}, 0.35)
+        tween(bar, {BackgroundTransparency = 1}, 0.35)
+        tween(fill, {BackgroundTransparency = 1}, 0.35)
+        tween(introFrame, {BackgroundTransparency = 1}, 0.45)
+        task.wait(0.5)
+        introFrame:Destroy()
+    end)
+end
+
+
 -- Tween Helper
 local function tween(obj, props, time)
     TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quint), props):Play()
 end
 
--- Main Frame
+playIntro()
+
+local openWidth, openHeight = 980, 420
+local openSize = UDim2.new(0, openWidth, 0, openHeight)
+local openPos = UDim2.new(0, 20, 0.5, -openHeight/2)
+local collapsedPos = UDim2.new(0, -(openWidth + 80), 0.5, -openHeight/2)
+
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 920, 0, 360)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -180)
+mainFrame.Size = openSize
+mainFrame.Position = openPos
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -142,28 +232,64 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = closeButton
 
--- Content
+-- Body containers
+local bodyFrame = Instance.new("Frame")
+bodyFrame.Size = UDim2.new(1, -20, 1, -80)
+bodyFrame.Position = UDim2.new(0, 10, 0, 70)
+bodyFrame.BackgroundTransparency = 1
+bodyFrame.Parent = mainFrame
+
+local bodyLayout = Instance.new("UIListLayout")
+bodyLayout.FillDirection = Enum.FillDirection.Horizontal
+bodyLayout.Padding = UDim.new(0, 12)
+bodyLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+bodyLayout.Parent = bodyFrame
+
+local actionsCard = Instance.new("Frame")
+actionsCard.Size = UDim2.new(0.7, 0, 1, 0)
+actionsCard.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+actionsCard.Parent = bodyFrame
+
+local actionsCorner = Instance.new("UICorner")
+actionsCorner.CornerRadius = UDim.new(0, 12)
+actionsCorner.Parent = actionsCard
+
+local actionsStroke = Instance.new("UIStroke")
+actionsStroke.Color = Color3.fromRGB(50, 90, 140)
+actionsStroke.Thickness = 1
+actionsStroke.Parent = actionsCard
+
+local actionsPadding = Instance.new("UIPadding")
+actionsPadding.PaddingTop = UDim.new(0, 10)
+actionsPadding.PaddingBottom = UDim.new(0, 10)
+actionsPadding.PaddingLeft = UDim.new(0, 10)
+actionsPadding.PaddingRight = UDim.new(0, 10)
+actionsPadding.Parent = actionsCard
+
 local contentFrame = Instance.new("ScrollingFrame")
-contentFrame.Size = UDim2.new(1, -20, 0, 170)
-contentFrame.Position = UDim2.new(0, 10, 0, 70)
+contentFrame.Size = UDim2.new(1, 0, 1, -10)
+contentFrame.Position = UDim2.new(0, 0, 0, 0)
 contentFrame.BackgroundTransparency = 1
+contentFrame.BorderSizePixel = 0
 contentFrame.ScrollBarThickness = 6
 contentFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 150)
-contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.X
-contentFrame.ScrollingDirection = Enum.ScrollingDirection.X
-contentFrame.Parent = mainFrame
+contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+contentFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+contentFrame.Parent = actionsCard
 
-local contentLayout = Instance.new("UIListLayout")
-contentLayout.FillDirection = Enum.FillDirection.Horizontal
-contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-contentLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-contentLayout.Padding = UDim.new(0, 10)
-contentLayout.Parent = contentFrame
+local contentGrid = Instance.new("UIGridLayout")
+contentGrid.CellSize = UDim2.new(0, 220, 0, 110)
+contentGrid.CellPadding = UDim2.new(0, 10, 0, 10)
+contentGrid.FillDirection = Enum.FillDirection.Horizontal
+contentGrid.FillDirectionMaxCells = 3
+contentGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
+contentGrid.VerticalAlignment = Enum.VerticalAlignment.Top
+contentGrid.SortOrder = Enum.SortOrder.LayoutOrder
+contentGrid.Parent = contentFrame
 
--- สร้างปุ่ม
 local function createButton(name, icon)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 200, 0, 120)
+    frame.Size = UDim2.new(0, 220, 0, 110)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
     frame.Parent = contentFrame
 
@@ -177,16 +303,16 @@ local function createButton(name, icon)
     stroke.Parent = frame
 
     local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 40, 0, 40)
-    iconLabel.Position = UDim2.new(0, 10, 0.5, -20)
+    iconLabel.Size = UDim2.new(0, 38, 0, 38)
+    iconLabel.Position = UDim2.new(0, 14, 0.5, -19)
     iconLabel.BackgroundTransparency = 1
     iconLabel.Text = icon
     iconLabel.TextSize = 28
     iconLabel.Parent = frame
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(0, 120, 0, 25)
-    textLabel.Position = UDim2.new(0, 55, 0, 8)
+    textLabel.Size = UDim2.new(0, 150, 0, 26)
+    textLabel.Position = UDim2.new(0, 60, 0, 6)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = name
     textLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
@@ -196,8 +322,8 @@ local function createButton(name, icon)
     textLabel.Parent = frame
 
     local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(0, 120, 0, 18)
-    statusLabel.Position = UDim2.new(0, 55, 0, 30)
+    statusLabel.Size = UDim2.new(0, 150, 0, 18)
+    statusLabel.Position = UDim2.new(0, 60, 0, 32)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = "ปิดอยู่"
     statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -266,29 +392,54 @@ local killAllBtn = createButton("Kill All", "💀")
 local wallbangBtn = createButton("ยิงทะลุ (Wallbang)", "🔫")  -- ปุ่มใหม่
 local teleportBtn = createButton("Teleport", "🌀")
 
--- Info Labels (แนวนอนด้านล่าง)
-local infoFrame = Instance.new("Frame")
-infoFrame.Size = UDim2.new(1, -20, 0, 80)
-infoFrame.Position = UDim2.new(0, 10, 0, 250)
-infoFrame.BackgroundTransparency = 1
-infoFrame.Parent = mainFrame
+-- Info panel (right column)
+local infoCard = Instance.new("Frame")
+infoCard.Size = UDim2.new(0.3, -12, 1, 0)
+infoCard.BackgroundColor3 = Color3.fromRGB(16, 22, 32)
+infoCard.Parent = bodyFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 12)
+infoCorner.Parent = infoCard
+
+local infoStroke = Instance.new("UIStroke")
+infoStroke.Color = Color3.fromRGB(60, 110, 170)
+infoStroke.Thickness = 1
+infoStroke.Parent = infoCard
+
+local infoPadding = Instance.new("UIPadding")
+infoPadding.PaddingTop = UDim.new(0, 14)
+infoPadding.PaddingBottom = UDim.new(0, 14)
+infoPadding.PaddingLeft = UDim.new(0, 14)
+infoPadding.PaddingRight = UDim.new(0, 14)
+infoPadding.Parent = infoCard
 
 local infoLayout = Instance.new("UIListLayout")
-infoLayout.FillDirection = Enum.FillDirection.Horizontal
-infoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-infoLayout.Padding = UDim.new(0, 20)
-infoLayout.Parent = infoFrame
+infoLayout.FillDirection = Enum.FillDirection.Vertical
+infoLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+infoLayout.Padding = UDim.new(0, 10)
+infoLayout.Parent = infoCard
+
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Size = UDim2.new(1, 0, 0, 26)
+infoTitle.BackgroundTransparency = 1
+infoTitle.Text = "Dashboard"
+infoTitle.TextColor3 = Color3.fromRGB(140, 200, 255)
+infoTitle.TextSize = 18
+infoTitle.Font = Enum.Font.GothamBold
+infoTitle.TextXAlignment = Enum.TextXAlignment.Left
+infoTitle.Parent = infoCard
 
 local function makeInfoLabel(text)
     local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0, 280, 0, 30)
+    lbl.Size = UDim2.new(1, 0, 0, 28)
     lbl.BackgroundTransparency = 1
     lbl.Text = text
     lbl.TextColor3 = Color3.fromRGB(200,200,220)
+    lbl.TextSize = 14
     lbl.Font = Enum.Font.Gotham
     lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = infoFrame
+    lbl.Parent = infoCard
     return lbl
 end
 
@@ -336,7 +487,7 @@ local function toggleCollapse()
     isCollapsed = not isCollapsed
     if isCollapsed then
         collapseButton.Text = "▶"
-        tween(mainFrame, {Size = UDim2.new(0,0,0,0), Position = UDim2.new(0,-300,0.5,-260)}, 0.4)
+        tween(mainFrame, {Size = UDim2.new(0,0,0,0), Position = collapsedPos}, 0.4)
         task.wait(0.4)
         mainFrame.Visible = false
         miniIcon.Visible = true
@@ -347,7 +498,7 @@ local function toggleCollapse()
         task.wait(0.4)
         miniIcon.Visible = false
         mainFrame.Visible = true
-        tween(mainFrame, {Size = UDim2.new(0,280,0,520), Position = UDim2.new(0,20,0.5,-260)}, 0.4)
+        tween(mainFrame, {Size = openSize, Position = openPos}, 0.4)
     end
 end
 
