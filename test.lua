@@ -38,8 +38,8 @@ end
 
 -- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 520)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -260)
+mainFrame.Size = UDim2.new(0, 920, 0, 360)
+mainFrame.Position = UDim2.new(0, 20, 0.5, -180)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -144,19 +144,26 @@ closeCorner.Parent = closeButton
 
 -- Content
 local contentFrame = Instance.new("ScrollingFrame")
-contentFrame.Size = UDim2.new(1, -20, 1, -80)
+contentFrame.Size = UDim2.new(1, -20, 0, 170)
 contentFrame.Position = UDim2.new(0, 10, 0, 70)
 contentFrame.BackgroundTransparency = 1
 contentFrame.ScrollBarThickness = 6
 contentFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 150)
-contentFrame.CanvasSize = UDim2.new(0, 0, 0, 650)
+contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.X
+contentFrame.ScrollingDirection = Enum.ScrollingDirection.X
 contentFrame.Parent = mainFrame
 
+local contentLayout = Instance.new("UIListLayout")
+contentLayout.FillDirection = Enum.FillDirection.Horizontal
+contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+contentLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+contentLayout.Padding = UDim.new(0, 10)
+contentLayout.Parent = contentFrame
+
 -- สร้างปุ่ม
-local function createButton(name, icon, yPos)
+local function createButton(name, icon)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, -10, 0, 55)
-    frame.Position = UDim2.new(0, 5, 0, yPos)
+    frame.Size = UDim2.new(0, 200, 0, 120)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
     frame.Parent = contentFrame
 
@@ -249,44 +256,45 @@ local function createButton(name, icon, yPos)
     return {button = button, toggle = toggle, status = statusLabel}
 end
 
-local noclipBtn = createButton("Noclip", "🧱", 10)
-local espBtn = createButton("ESP", "👁️", 75)
-local aimbotBtn = createButton("Aimbot (Head Only)", "🎯", 140)
-local speedBtn = createButton("Speed", "⚡", 205)
-local invisibleBtn = createButton("ล่องหน (Invisible)", "👻", 270)
-local bringBtn = createButton("ดึงผู้เล่นมาหา (Bring)", "🧲", 335)
-local killAllBtn = createButton("Kill All", "💀", 400)
-local wallbangBtn = createButton("ยิงทะลุ (Wallbang)", "🔫", 465)  -- ปุ่มใหม่
-local teleportBtn = createButton("Teleport", "🌀", 530)
+local noclipBtn = createButton("Noclip", "🧱")
+local espBtn = createButton("ESP", "👁️")
+local aimbotBtn = createButton("Aimbot (Head Only)", "🎯")
+local speedBtn = createButton("Speed", "⚡")
+local invisibleBtn = createButton("ล่องหน (Invisible)", "👻")
+local bringBtn = createButton("ดึงผู้เล่นมาหา (Bring)", "🧲")
+local killAllBtn = createButton("Kill All", "💀")
+local wallbangBtn = createButton("ยิงทะลุ (Wallbang)", "🔫")  -- ปุ่มใหม่
+local teleportBtn = createButton("Teleport", "🌀")
 
--- Info Labels
-local targetLabel = Instance.new("TextLabel")
-targetLabel.Position = UDim2.new(0, 15, 0, 580)
-targetLabel.Size = UDim2.new(1, -30, 0, 30)
-targetLabel.BackgroundTransparency = 1
-targetLabel.Text = "🎯 เป้าหมาย: ไม่มี"
-targetLabel.TextColor3 = Color3.fromRGB(200,200,220)
-targetLabel.Font = Enum.Font.Gotham
-targetLabel.TextXAlignment = Enum.TextXAlignment.Left
-targetLabel.Parent = contentFrame
+-- Info Labels (แนวนอนด้านล่าง)
+local infoFrame = Instance.new("Frame")
+infoFrame.Size = UDim2.new(1, -20, 0, 80)
+infoFrame.Position = UDim2.new(0, 10, 0, 250)
+infoFrame.BackgroundTransparency = 1
+infoFrame.Parent = mainFrame
 
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Position = UDim2.new(0, 15, 0, 610)
-speedLabel.Size = UDim2.new(1, -30, 0, 30)
-speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "⚡ ความเร็ว: 16"
-speedLabel.TextColor3 = Color3.fromRGB(200,200,220)
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.Parent = contentFrame
+local infoLayout = Instance.new("UIListLayout")
+infoLayout.FillDirection = Enum.FillDirection.Horizontal
+infoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+infoLayout.Padding = UDim.new(0, 20)
+infoLayout.Parent = infoFrame
 
-local playersLabel = Instance.new("TextLabel")
-playersLabel.Position = UDim2.new(0, 15, 0, 640)
-playersLabel.Size = UDim2.new(1, -30, 0, 30)
-playersLabel.BackgroundTransparency = 1
-playersLabel.Text = "👥 ผู้เล่น: " .. #Players:GetPlayers()
-playersLabel.TextColor3 = Color3.fromRGB(200,200,220)
-playersLabel.Font = Enum.Font.Gotham
-playersLabel.Parent = contentFrame
+local function makeInfoLabel(text)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 280, 0, 30)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(200,200,220)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = infoFrame
+    return lbl
+end
+
+local targetLabel = makeInfoLabel("🎯 เป้าหมาย: ไม่มี")
+local speedLabel = makeInfoLabel("⚡ ความเร็ว: 16")
+local playersLabel = makeInfoLabel("👥 ผู้เล่น: " .. #Players:GetPlayers())
 
 task.spawn(function()
     while task.wait(2) do
@@ -557,7 +565,7 @@ end)
 -- Teleport Menu
 local tpMenu = Instance.new("Frame")
 tpMenu.Size = UDim2.new(0, 250, 0, 300)
-tpMenu.Position = UDim2.new(0.5, 155, 0.5, -150)
+tpMenu.Position = UDim2.new(0.5, -125, 0.5, -150)
 tpMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 tpMenu.Visible = false
 tpMenu.Parent = screenGui
