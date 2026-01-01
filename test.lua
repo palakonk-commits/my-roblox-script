@@ -1,13 +1,8 @@
--- Thai Exploit Premium v2.6 - 2026 Update
--- Modified: Horizontal UI layout, fit screen, beautiful design, section tabs, anti-cheat scan & bypass, added features
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -20,69 +15,12 @@ local speedEnabled = false
 local noclipEnabled = false
 local espEnabled = false
 local aimbotEnabled = false
-local aimbotTarget = nil
 local aimbotFOV = 200
 local aimbotSmooth = 8
 local invisibleEnabled = false
 local bringEnabled = false
-local killAllEnabled = false
 local wallbangEnabled = false
-local teleportEnabled = false
-local godModeEnabled = false  -- New feature: God Mode
-local flyEnabled = false      -- New feature: Fly
-local infJumpEnabled = false  -- New feature: Infinite Jump
-local autoFarmEnabled = false -- New feature: Auto Farm (dummy for now)
 local isCollapsed = false
-local antiCheatDetected = false
-local antiCheatBypassed = false
-
--- Anti-Cheat Scan Function
-local function scanAntiCheat()
-    -- Scan for common anti-cheat indicators (examples: specific scripts, variables, or behaviors)
-    local knownAntiCheats = {
-        "AntiExploit", "Adonis", "Byfron", "AntiCheatScript", -- Add more known names
-    }
-    
-    for _, service in ipairs({workspace, ReplicatedStorage, Lighting, game:GetService("ServerScriptService")}) do
-        for _, obj in ipairs(service:GetDescendants()) do
-            if obj:IsA("Script") or obj:IsA("LocalScript") then
-                for _, ac in ipairs(knownAntiCheats) do
-                    if string.find(obj.Name:lower(), ac:lower()) then
-                        antiCheatDetected = true
-                        -- Attempt bypass (dummy: rename or disable)
-                        pcall(function()
-                            obj.Disabled = true
-                            obj.Name = "Bypassed_" .. obj.Name
-                            antiCheatBypassed = true
-                        end)
-                        return
-                    end
-                end
-            end
-        end
-    end
-    
-    if antiCheatDetected and not antiCheatBypassed then
-        -- Notify and apologize
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Thai Exploit Premium",
-            Text = "ตรวจพบระบบป้องกันแต่ไม่สามารถ Bypass ได้ ขออภัยในความไม่สะดวก",
-            Duration = 10
-        })
-    elseif antiCheatDetected and antiCheatBypassed then
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Thai Exploit Premium",
-            Text = "ตรวจพบระบบป้องกันและ Bypass สำเร็จ!",
-            Duration = 5
-        })
-    else
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "Thai Exploit Premium",
-            Text = "ไม่พบระบบป้องกัน สามารถใช้งานได้ปกติ",
-            Duration = 5
-        })
-    end
-end
 
 -- ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -91,57 +29,103 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- Tween Helper
+-- Intro overlay
+local function playIntro()
+    local introFrame = Instance.new("Frame")
+    introFrame.Size = UDim2.fromScale(1, 1)
+    introFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
+    introFrame.BorderSizePixel = 0
+    introFrame.ZIndex = 100
+    introFrame.Parent = screenGui
+
+    local introGradient = Instance.new("UIGradient")
+    introGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 32, 60)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 24))
+    }
+    introGradient.Rotation = 120
+    introGradient.Parent = introFrame
+
+    local introTitle = Instance.new("TextLabel")
+    introTitle.Size = UDim2.new(1, 0, 0, 40)
+    introTitle.Position = UDim2.new(0, 0, 0.4, -20)
+    introTitle.BackgroundTransparency = 1
+    introTitle.Text = "ยินดีต้อนรับสู่ Thai Exploit Premium"
+    introTitle.TextColor3 = Color3.fromRGB(170, 230, 255)
+    introTitle.TextTransparency = 1
+    introTitle.TextSize = 22
+    introTitle.Font = Enum.Font.GothamBold
+    introTitle.ZIndex = 101
+    introTitle.Parent = introFrame
+
+    local introSubtitle = Instance.new("TextLabel")
+    introSubtitle.Size = UDim2.new(1, 0, 0, 22)
+    introSubtitle.Position = UDim2.new(0, 0, 0.4, 20)
+    introSubtitle.BackgroundTransparency = 1
+    introSubtitle.Text = "กำลังเตรียม UI และฟังก์ชัน..."
+    introSubtitle.TextColor3 = Color3.fromRGB(180, 200, 220)
+    introSubtitle.TextTransparency = 1
+    introSubtitle.TextSize = 16
+    introSubtitle.Font = Enum.Font.Gotham
+    introSubtitle.ZIndex = 101
+    introSubtitle.Parent = introFrame
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(0, 320, 0, 8)
+    bar.Position = UDim2.new(0.5, -160, 0.55, -4)
+    bar.BackgroundColor3 = Color3.fromRGB(35, 70, 120)
+    bar.BackgroundTransparency = 0.5
+    bar.BorderSizePixel = 0
+    bar.ZIndex = 101
+    bar.Parent = introFrame
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = bar
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new(0, 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
+    fill.BackgroundTransparency = 0.1
+    fill.BorderSizePixel = 0
+    fill.ZIndex = 102
+    fill.Parent = bar
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
+
+    local function tween(obj, props, time)
+        TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quint), props):Play()
+    end
+
+    tween(introTitle, {TextTransparency = 0}, 0.3)
+    tween(introSubtitle, {TextTransparency = 0}, 0.35)
+    tween(fill, {Size = UDim2.new(1, 0, 1, 0)}, 1.05)
+
+    task.spawn(function()
+        task.wait(1.2)
+        tween(introTitle, {TextTransparency = 1}, 0.35)
+        tween(introSubtitle, {TextTransparency = 1}, 0.35)
+        tween(bar, {BackgroundTransparency = 1}, 0.35)
+        tween(fill, {BackgroundTransparency = 1}, 0.35)
+        tween(introFrame, {BackgroundTransparency = 1}, 0.45)
+        task.wait(0.5)
+        introFrame:Destroy()
+    end)
+end
+
+playIntro()
+
+-- Tween Helper (ประกาศหลัง intro เพราะใน intro ใช้ local tween ชั่วคราว)
 local function tween(obj, props, time)
     TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quint), props):Play()
 end
 
--- Loading Screen (ไม่เต็มจอ, ขนาดพอดี, สวยงาม)
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(0, 300, 0, 150)  -- ขนาดพอดี ไม่เต็มจอ
-loadingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)  -- กลางจอ
-loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-loadingFrame.BorderSizePixel = 0
-loadingFrame.Parent = screenGui
-
-local loadingCorner = Instance.new("UICorner")
-loadingCorner.CornerRadius = UDim.new(0, 15)
-loadingCorner.Parent = loadingFrame
-
-local loadingGradient = Instance.new("UIGradient")
-loadingGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
-}
-loadingGradient.Rotation = 45
-loadingGradient.Parent = loadingFrame
-
-local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(1, 0, 1, 0)
-loadingText.BackgroundTransparency = 1
-loadingText.Text = "กำลังโหลด Thai Exploit Premium..."
-loadingText.TextColor3 = Color3.new(1,1,1)
-loadingText.TextSize = 20
-loadingText.Font = Enum.Font.GothamBold
-loadingText.Parent = loadingFrame
-
--- แสดง loading 3 วินาทีแล้วซ่อน
-task.wait(3)
-tween(loadingFrame, {Transparency = 1}, 0.5)
-task.delay(0.5, function() loadingFrame:Destroy() end)
-
--- Scan anti-cheat หลัง loading
-scanAntiCheat()
-
--- ถ้าไม่ bypass ได้ หยุดที่นี่ (แต่ยังให้ code เต็ม)
-if antiCheatDetected and not antiCheatBypassed then
-    return
-end
-
--- Main Frame (แนวนอน, ขนาดพอดี ไม่เต็มจอ, สวยงาม)
+-- Main Frame ขนาดใหญ่แนวตั้ง (แก้ UI เพี้ยน)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0.8, 0, 0, 300)  -- แนวนอน กว้าง 80% สูงพอดี
-mainFrame.Position = UDim2.new(0.1, 0, 0.5, -150)  -- กลางจอ ไม่เต็ม
+mainFrame.Size = UDim2.new(0, 400, 0, 600)
+mainFrame.Position = UDim2.new(0, 20, 0.5, -300)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -172,9 +156,9 @@ task.spawn(function()
     end
 end)
 
--- Header (ปรับให้แนวนอน)
+-- Header
 local headerFrame = Instance.new("Frame")
-headerFrame.Size = UDim2.new(1, 0, 0, 50)
+headerFrame.Size = UDim2.new(1, 0, 0, 60)
 headerFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
 headerFrame.BorderSizePixel = 0
 headerFrame.Parent = mainFrame
@@ -184,44 +168,44 @@ headerCorner.CornerRadius = UDim.new(0, 15)
 headerCorner.Parent = headerFrame
 
 local logo = Instance.new("TextLabel")
-logo.Size = UDim2.new(0, 40, 0, 40)
+logo.Size = UDim2.new(0, 50, 0, 50)
 logo.Position = UDim2.new(0, 10, 0, 5)
 logo.BackgroundTransparency = 1
-logo.Text = "TH"
-logo.TextSize = 30
+logo.Text = "🇹🇭"
+logo.TextSize = 35
 logo.Font = Enum.Font.GothamBold
 logo.Parent = headerFrame
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 200, 0, 30)
-title.Position = UDim2.new(0, 55, 0, 5)
+title.Position = UDim2.new(0, 65, 0, 8)
 title.BackgroundTransparency = 1
-title.Text = "Thai Exploit Premium v2.6"
+title.Text = "Thai Exploit"
 title.TextColor3 = Color3.new(1,1,1)
-title.TextSize = 18
+title.TextSize = 20
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = headerFrame
 
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(0, 200, 0, 20)
-subtitle.Position = UDim2.new(0, 55, 0, 30)
+subtitle.Position = UDim2.new(0, 65, 0, 35)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "2026 Edition - สวยงามและใช้งานง่าย"
+subtitle.Text = "Premium v2.5 - 2026"
 subtitle.TextColor3 = Color3.fromRGB(150, 150, 180)
-subtitle.TextSize = 12
+subtitle.TextSize = 11
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = headerFrame
 
--- Collapse & Close Buttons (แนวนอนด้านขวา)
+-- Collapse / Close Buttons
 local collapseButton = Instance.new("TextButton")
-collapseButton.Size = UDim2.new(0, 30, 0, 30)
-collapseButton.Position = UDim2.new(1, -100, 0, 10)
+collapseButton.Size = UDim2.new(0, 35, 0, 35)
+collapseButton.Position = UDim2.new(1, -85, 0, 12.5)
 collapseButton.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-collapseButton.Text = "<"
+collapseButton.Text = "◀"
 collapseButton.TextColor3 = Color3.new(1,1,1)
-collapseButton.TextSize = 16
+collapseButton.TextSize = 18
 collapseButton.Font = Enum.Font.GothamBold
 collapseButton.Parent = headerFrame
 
@@ -230,12 +214,12 @@ collapseCorner.CornerRadius = UDim.new(0, 8)
 collapseCorner.Parent = collapseButton
 
 local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -60, 0, 10)
+closeButton.Size = UDim2.new(0, 35, 0, 35)
+closeButton.Position = UDim2.new(1, -45, 0, 12.5)
 closeButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-closeButton.Text = "X"
+closeButton.Text = "✕"
 closeButton.TextColor3 = Color3.new(1,1,1)
-closeButton.TextSize = 16
+closeButton.TextSize = 18
 closeButton.Font = Enum.Font.GothamBold
 closeButton.Parent = headerFrame
 
@@ -243,94 +227,29 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = closeButton
 
--- Tab System for Sections (แยกหัวข้อ: Movement, Combat, Visual, Other)
-local tabFrame = Instance.new("Frame")
-tabFrame.Size = UDim2.new(1, 0, 0, 40)
-tabFrame.Position = UDim2.new(0, 0, 0, 50)
-tabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-tabFrame.BorderSizePixel = 0
-tabFrame.Parent = mainFrame
+-- Content ScrollingFrame (แนวตั้ง เรียบร้อย)
+local contentFrame = Instance.new("ScrollingFrame")
+contentFrame.Size = UDim2.new(1, -20, 1, -80)
+contentFrame.Position = UDim2.new(0, 10, 0, 70)
+contentFrame.BackgroundTransparency = 1
+contentFrame.ScrollBarThickness = 6
+contentFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 150)
+contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+contentFrame.Parent = mainFrame
 
-local tabLayout = Instance.new("UIListLayout")
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-tabLayout.Padding = UDim.new(0, 10)
-tabLayout.Parent = tabFrame
+local contentLayout = Instance.new("UIListLayout")
+contentLayout.Padding = UDim.new(0, 12)
+contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+contentLayout.Parent = contentFrame
 
-local function createTab(name)
-    local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(0, 120, 0, 30)
-    tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-    tabButton.Text = name
-    tabButton.TextColor3 = Color3.new(1,1,1)
-    tabButton.TextSize = 14
-    tabButton.Font = Enum.Font.GothamBold
-    tabButton.Parent = tabFrame
-
-    local tabCorner = Instance.new("UICorner")
-    tabCorner.CornerRadius = UDim.new(0, 8)
-    tabCorner.Parent = tabButton
-
-    return tabButton
-end
-
-local movementTab = createTab("Movement")
-local combatTab = createTab("Combat")
-local visualTab = createTab("Visual")
-local otherTab = createTab("Other")
-
--- Content Frames for each tab (แนวนอน layout)
-local contentFrames = {}
-local currentTab = "Movement"
-
-local function createContentFrame()
-    local frame = Instance.new("ScrollingFrame")
-    frame.Size = UDim2.new(1, -20, 1, -100)
-    frame.Position = UDim2.new(0, 10, 0, 90)
-    frame.BackgroundTransparency = 1
-    frame.ScrollBarThickness = 6
-    frame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 150)
-    frame.CanvasSize = UDim2.new(2, 0, 0, 0)  -- แนวนอน scroll
-    frame.ScrollingDirection = Enum.ScrollingDirection.X
-    frame.Parent = mainFrame
-    frame.Visible = false
-
-    local layout = Instance.new("UIListLayout")
-    layout.FillDirection = Enum.FillDirection.Horizontal
-    layout.Padding = UDim.new(0, 10)
-    layout.Parent = frame
-
-    return frame
-end
-
-contentFrames["Movement"] = createContentFrame()
-contentFrames["Combat"] = createContentFrame()
-contentFrames["Visual"] = createContentFrame()
-contentFrames["Other"] = createContentFrame()
-
-contentFrames["Movement"].Visible = true
-
--- Switch Tab Function
-local function switchTab(tabName)
-    for _, frame in pairs(contentFrames) do
-        frame.Visible = false
-    end
-    contentFrames[tabName].Visible = true
-    currentTab = tabName
-end
-
-movementTab.MouseButton1Click:Connect(function() switchTab("Movement") end)
-combatTab.MouseButton1Click:Connect(function() switchTab("Combat") end)
-visualTab.MouseButton1Click:Connect(function() switchTab("Visual") end)
-otherTab.MouseButton1Click:Connect(function() switchTab("Other") end)
-
--- สร้างปุ่ม (ปรับให้สวยงามยิ่งขึ้น, แนวนอน)
-local function createButton(name, icon, parentFrame, enabledVar)
+-- สร้างปุ่ม (แก้ให้เรียงแนวตั้งสวยงาม)
+local function createButton(name, icon)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 200, 1, -20)  -- กว้างสำหรับแนวนอน
+    frame.Size = UDim2.new(1, -20, 0, 70)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-    frame.Parent = parentFrame
+    frame.Parent = contentFrame
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 12)
@@ -342,38 +261,38 @@ local function createButton(name, icon, parentFrame, enabledVar)
     stroke.Parent = frame
 
     local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 40, 0, 40)
-    iconLabel.Position = UDim2.new(0, 10, 0.1, 0)
+    iconLabel.Size = UDim2.new(0, 50, 0, 50)
+    iconLabel.Position = UDim2.new(0, 15, 0.5, -25)
     iconLabel.BackgroundTransparency = 1
     iconLabel.Text = icon
-    iconLabel.TextSize = 28
+    iconLabel.TextSize = 36
     iconLabel.Parent = frame
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(0, 140, 0, 25)
-    textLabel.Position = UDim2.new(0, 10, 0.4, 0)
+    textLabel.Size = UDim2.new(0, 200, 0, 30)
+    textLabel.Position = UDim2.new(0, 75, 0, 10)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = name
     textLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
-    textLabel.TextSize = 14
+    textLabel.TextSize = 16
     textLabel.Font = Enum.Font.GothamBold
     textLabel.TextXAlignment = Enum.TextXAlignment.Left
     textLabel.Parent = frame
 
     local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(0, 140, 0, 18)
-    statusLabel.Position = UDim2.new(0, 10, 0.6, 0)
+    statusLabel.Size = UDim2.new(0, 200, 0, 20)
+    statusLabel.Position = UDim2.new(0, 75, 0, 38)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = "ปิดอยู่"
     statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-    statusLabel.TextSize = 11
+    statusLabel.TextSize = 12
     statusLabel.Font = Enum.Font.Gotham
     statusLabel.TextXAlignment = Enum.TextXAlignment.Left
     statusLabel.Parent = frame
 
     local switch = Instance.new("Frame")
-    switch.Size = UDim2.new(0, 50, 0, 28)
-    switch.Position = UDim2.new(0, 10, 0.8, 0)
+    switch.Size = UDim2.new(0, 60, 0, 34)
+    switch.Position = UDim2.new(1, -80, 0.5, -17)
     switch.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
     switch.Parent = frame
 
@@ -382,8 +301,8 @@ local function createButton(name, icon, parentFrame, enabledVar)
     switchCorner.Parent = switch
 
     local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 22, 0, 22)
-    knob.Position = UDim2.new(0, 3, 0.5, -11)
+    knob.Size = UDim2.new(0, 26, 0, 26)
+    knob.Position = UDim2.new(0, 4, 0.5, -13)
     knob.BackgroundColor3 = Color3.fromRGB(200, 200, 220)
     knob.Parent = switch
 
@@ -401,268 +320,424 @@ local function createButton(name, icon, parentFrame, enabledVar)
     local function toggle(state)
         active = state ~= nil and state or not active
         if active then
-            tween(knob, {Position = UDim2.new(1, -25, 0.5, -11)}, 0.3)
+            tween(knob, {Position = UDim2.new(1, -30, 0.5, -13)}, 0.3)
             tween(switch, {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}, 0.3)
             tween(stroke, {Color = Color3.fromRGB(0, 255, 150)}, 0.3)
             statusLabel.Text = "เปิดอยู่"
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
-            enabledVar = true
         else
-            tween(knob, {Position = UDim2.new(0, 3, 0.5, -11)}, 0.3)
+            tween(knob, {Position = UDim2.new(0, 4, 0.5, -13)}, 0.3)
             tween(switch, {BackgroundColor3 = Color3.fromRGB(80, 80, 100)}, 0.3)
             tween(stroke, {Color = Color3.fromRGB(60, 60, 80)}, 0.3)
             statusLabel.Text = "ปิดอยู่"
             statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-            enabledVar = false
         end
     end
 
-    button.MouseButton1Click:Connect(toggle)
     button.MouseEnter:Connect(function() tween(frame, {BackgroundColor3 = Color3.fromRGB(45, 45, 65)}, 0.2) end)
     button.MouseLeave:Connect(function() if not active then tween(frame, {BackgroundColor3 = Color3.fromRGB(35, 35, 50)}, 0.2) end end)
 
-    return {button = button, toggle = toggle}
+    return {button = button, toggle = toggle, status = statusLabel}
 end
 
--- Add buttons to tabs
-createButton("Speed", "Lightning", contentFrames["Movement"], speedEnabled)
-createButton("Noclip", "Block", contentFrames["Movement"], noclipEnabled)
-createButton("Fly", "Wing", contentFrames["Movement"], flyEnabled)  -- New
-createButton("Inf Jump", "Jump", contentFrames["Movement"], infJumpEnabled)  -- New
+local noclipBtn = createButton("Noclip", "🧱")
+local espBtn = createButton("ESP", "👁️")
+local aimbotBtn = createButton("Aimbot (Head Only)", "🎯")
+local speedBtn = createButton("Speed", "⚡")
+local invisibleBtn = createButton("ล่องหน (Invisible)", "👻")
+local bringBtn = createButton("ดึงผู้เล่นมาหา (Bring)", "🧲")
+local killAllBtn = createButton("Kill All", "💀")
+local wallbangBtn = createButton("ยิงทะลุ (Wallbang)", "🔫")
+local teleportBtn = createButton("Teleport", "🌀")
 
-createButton("Aimbot", "Target", contentFrames["Combat"], aimbotEnabled)
-createButton("Wallbang", "Gun", contentFrames["Combat"], wallbangEnabled)
-createButton("Kill All", "Skull", contentFrames["Combat"], killAllEnabled)
-createButton("Bring", "Magnet", contentFrames["Combat"], bringEnabled)
-createButton("God Mode", "Shield", contentFrames["Combat"], godModeEnabled)  -- New
-
-createButton("ESP", "Eye", contentFrames["Visual"], espEnabled)
-createButton("Invisible", "Ghost", contentFrames["Visual"], invisibleEnabled)
-
-createButton("Teleport", "Swirl", contentFrames["Other"], teleportEnabled)
-createButton("Auto Farm", "Farm", contentFrames["Other"], autoFarmEnabled)  -- New
-
--- Info Labels (ด้านล่าง, แนวนอน)
-local infoFrame = Instance.new("Frame")
-infoFrame.Size = UDim2.new(1, 0, 0, 50)
-infoFrame.Position = UDim2.new(0, 0, 1, -50)
-infoFrame.BackgroundTransparency = 1
-infoFrame.Parent = mainFrame
+-- Info Labels (วางใต้ปุ่มทั้งหมด)
+local infoSeparator = Instance.new("Frame")
+infoSeparator.Size = UDim2.new(1, -40, 0, 2)
+infoSeparator.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+infoSeparator.BorderSizePixel = 0
+infoSeparator.Parent = contentFrame
 
 local targetLabel = Instance.new("TextLabel")
-targetLabel.Size = UDim2.new(0.3, 0, 1, 0)
+targetLabel.Size = UDim2.new(1, -40, 0, 30)
 targetLabel.BackgroundTransparency = 1
-targetLabel.Text = "Target: ไม่มี"
+targetLabel.Text = "🎯 เป้าหมาย: ไม่มี"
 targetLabel.TextColor3 = Color3.fromRGB(200,200,220)
 targetLabel.Font = Enum.Font.Gotham
 targetLabel.TextXAlignment = Enum.TextXAlignment.Left
-targetLabel.Parent = infoFrame
+targetLabel.Parent = contentFrame
 
 local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(0.3, 0, 1, 0)
-speedLabel.Position = UDim2.new(0.3, 0, 0, 0)
+speedLabel.Size = UDim2.new(1, -40, 0, 30)
 speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "Speed: 16"
+speedLabel.Text = "⚡ ความเร็ว: 16"
 speedLabel.TextColor3 = Color3.fromRGB(200,200,220)
 speedLabel.Font = Enum.Font.Gotham
-speedLabel.Parent = infoFrame
+speedLabel.Parent = contentFrame
 
 local playersLabel = Instance.new("TextLabel")
-playersLabel.Size = UDim2.new(0.3, 0, 1, 0)
-playersLabel.Position = UDim2.new(0.6, 0, 0, 0)
+playersLabel.Size = UDim2.new(1, -40, 0, 30)
 playersLabel.BackgroundTransparency = 1
-playersLabel.Text = "Players: " .. #Players:GetPlayers()
+playersLabel.Text = "👥 ผู้เล่น: " .. #Players:GetPlayers()
 playersLabel.TextColor3 = Color3.fromRGB(200,200,220)
 playersLabel.Font = Enum.Font.Gotham
-playersLabel.Parent = infoFrame
+playersLabel.Parent = contentFrame
 
--- Collapse Functionality
-collapseButton.MouseButton1Click:Connect(function()
+task.spawn(function()
+    while task.wait(2) do
+        playersLabel.Text = "👥 ผู้เล่น: " .. #Players:GetPlayers()
+    end
+end)
+
+-- Mini Icon
+local miniIcon = Instance.new("Frame")
+miniIcon.Size = UDim2.new(0, 60, 0, 60)
+miniIcon.Position = UDim2.new(0, 20, 0.5, -30)
+miniIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+miniIcon.Visible = false
+miniIcon.Parent = screenGui
+
+local miniCorner = Instance.new("UICorner")
+miniCorner.CornerRadius = UDim.new(0, 15)
+miniCorner.Parent = miniIcon
+
+local miniBorder = Instance.new("UIStroke")
+miniBorder.Thickness = 2
+miniBorder.Parent = miniIcon
+
+local miniLogo = Instance.new("TextLabel")
+miniLogo.Size = UDim2.new(1,0,1,0)
+miniLogo.BackgroundTransparency = 1
+miniLogo.Text = "🇹🇭"
+miniLogo.TextSize = 35
+miniLogo.Font = Enum.Font.GothamBold
+miniLogo.Parent = miniIcon
+
+local miniBtn = Instance.new("TextButton")
+miniBtn.Size = UDim2.new(1,0,1,0)
+miniBtn.BackgroundTransparency = 1
+miniBtn.Parent = miniIcon
+
+-- Collapse Logic
+local function toggleCollapse()
     isCollapsed = not isCollapsed
     if isCollapsed then
-        tween(mainFrame, {Size = UDim2.new(0, 300, 0, 50)}, 0.3)
-        tabFrame.Visible = false
-        for _, frame in pairs(contentFrames) do frame.Visible = false end
-        infoFrame.Visible = false
+        collapseButton.Text = "▶"
+        tween(mainFrame, {Position = UDim2.new(0, -450, 0.5, -300)}, 0.4)
+        task.wait(0.4)
+        mainFrame.Visible = false
+        miniIcon.Visible = true
     else
-        tween(mainFrame, {Size = UDim2.new(0.8, 0, 0, 300)}, 0.3)
-        tabFrame.Visible = true
-        contentFrames[currentTab].Visible = true
-        infoFrame.Visible = true
-    end
-end)
-
--- Close Functionality
-closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
-
--- Implement Features (ตัวอย่าง implementation, ปรับให้สมบูรณ์ตามต้องการ)
--- Speed
-RunService.RenderStepped:Connect(function()
-    if speedEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = currentSpeed
-    end
-end)
-
--- Noclip
-RunService.Stepped:Connect(function()
-    if noclipEnabled and player.Character then
-        for _, part in ipairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
-
--- ESP (dummy)
-local function addESP(plr)
-    if plr ~= player and plr.Character then
-        local highlight = Instance.new("Highlight")
-        highlight.Parent = plr.Character
-        highlight.FillColor = Color3.fromRGB(255, 0, 0)
-        highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+        collapseButton.Text = "◀"
+        miniIcon.Visible = false
+        mainFrame.Visible = true
+        tween(mainFrame, {Position = UDim2.new(0, 20, 0.5, -300)}, 0.4)
     end
 end
 
-Players.PlayerAdded:Connect(addESP)
-for _, plr in ipairs(Players:GetPlayers()) do addESP(plr) end
+collapseButton.MouseButton1Click:Connect(toggleCollapse)
+miniBtn.MouseButton1Click:Connect(toggleCollapse)
+closeButton.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 
--- Aimbot (Head Only)
-RunService.RenderStepped:Connect(function()
-    if aimbotEnabled then
-        -- Find closest head in FOV
-        local closest = nil
-        local minDist = aimbotFOV
-        local mousePos = UserInputService:GetMouseLocation()
-        
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
-                local head = plr.Character.Head
-                local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-                if onScreen then
-                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if dist < minDist then
-                        minDist = dist
-                        closest = head
-                    end
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.F then toggleCollapse() end
+end)
+
+-- ฟังก์ชันต่าง ๆ (เหมือนเดิม)
+local noclipConn
+noclipBtn.button.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    noclipBtn.toggle(noclipEnabled)
+    if noclipEnabled then
+        noclipConn = RunService.Heartbeat:Connect(function()
+            if player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
+    end
+end)
+
+local highlights = {}
+local function updateESP()
+    if espEnabled then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and not highlights[p] then
+                local hl = Instance.new("Highlight")
+                hl.FillColor = Color3.fromRGB(255,0,0)
+                hl.OutlineColor = Color3.fromRGB(255,255,0)
+                hl.FillTransparency = 0.5
+                hl.Parent = p.Character
+                highlights[p] = hl
+            end
+        end
+    else
+        for _, hl in pairs(highlights) do if hl then hl:Destroy() end end
+        highlights = {}
+    end
+end
+espBtn.button.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espBtn.toggle(espEnabled)
+    updateESP()
+end)
+Players.PlayerAdded:Connect(function(p)
+    if espEnabled then
+        p.CharacterAdded:Connect(function()
+            task.wait(0.5)
+            updateESP()
+        end)
+    end
+end)
+
+local fovCircle = Drawing.new("Circle")
+fovCircle.Radius = aimbotFOV
+fovCircle.Thickness = 2
+fovCircle.Color = Color3.fromRGB(0,255,150)
+fovCircle.Transparency = 0.6
+fovCircle.Visible = false
+
+local function getClosestHead()
+    local closest = nil
+    local shortest = aimbotFOV
+    local mPos = Vector2.new(mouse.X, mouse.Y + 36)
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+            local head = p.Character.Head
+            local pos, visible = Camera:WorldToViewportPoint(head.Position)
+            if visible then
+                local dist = (Vector2.new(pos.X, pos.Y) - mPos).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = head
                 end
             end
         end
-        
-        if closest then
-            aimbotTarget = closest
-            local targetPos = Camera:WorldToViewportPoint(closest.Position)
-            local move = (Vector2.new(targetPos.X, targetPos.Y) - mousePos) / aimbotSmooth
-            mousemoverel(move.X, move.Y)
-        end
     end
-end)
-
--- Invisible
-local function toggleInvisible()
-    if invisibleEnabled and player.Character then
-        for _, part in ipairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 0.5  -- Semi-invisible
-            end
-        end
-    end
+    return closest
 end
 
--- Bring
-local function bringPlayers()
-    if bringEnabled and player.Character then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character then
-                plr.Character:MoveTo(player.Character.HumanoidRootPart.Position)
-            end
-        end
-    end
-end
-
--- Kill All
-local function killAll()
-    if killAllEnabled then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                plr.Character.Humanoid.Health = 0
-            end
-        end
-    end
-end
-
--- Wallbang (ยิงทะลุ, dummy)
-local function wallbang()
-    if wallbangEnabled then
-        -- Implement raycast ignore walls or something
-    end
-end
-
--- Teleport (click to teleport)
-mouse.Button1Down:Connect(function()
-    if teleportEnabled then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 5, 0))
-    end
+aimbotBtn.button.MouseButton1Click:Connect(function()
+    aimbotEnabled = not aimbotEnabled
+    aimbotBtn.toggle(aimbotEnabled)
+    fovCircle.Visible = aimbotEnabled
 end)
 
--- New: God Mode
-RunService.Heartbeat:Connect(function()
-    if godModeEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.Health = player.Character.Humanoid.MaxHealth
-    end
-end)
-
--- New: Fly
-local flySpeed = 50
-local bodyVelocity = nil
-UserInputService.InputBegan:Connect(function(input)
-    if flyEnabled and input.KeyCode == Enum.KeyCode.Space then
-        if not bodyVelocity then
-            bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
-            bodyVelocity.Parent = player.Character.HumanoidRootPart
-        end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if flyEnabled and input.KeyCode == Enum.KeyCode.Space then
-        if bodyVelocity then
-            bodyVelocity:Destroy()
-            bodyVelocity = nil
-        end
-    end
-end)
-
--- New: Infinite Jump
-UserInputService.JumpRequest:Connect(function()
-    if infJumpEnabled and player.Character then
-        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- New: Auto Farm (dummy, adjust for game)
-RunService.Heartbeat:Connect(function()
-    if autoFarmEnabled then
-        -- Auto collect or something
-    end
-end)
-
--- Update labels
 RunService.RenderStepped:Connect(function()
-    targetLabel.Text = "Target: " .. (aimbotTarget and aimbotTarget.Parent.Name or "ไม่มี")
-    speedLabel.Text = "Speed: " .. currentSpeed
-    playersLabel.Text = "Players: " .. #Players:GetPlayers()
-end)
-
--- Hotkeys (ตัวอย่าง)
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode == Enum.KeyCode.LeftBracket then
-        currentSpeed = math.max(16, currentSpeed - 5)
-    elseif input.KeyCode == Enum.KeyCode.RightBracket then
-        currentSpeed = currentSpeed + 5
+    if aimbotEnabled then
+        fovCircle.Position = Vector2.new(mouse.X, mouse.Y + 36)
+        local targetHead = getClosestHead()
+        if targetHead then
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetHead.Position), 1 / aimbotSmooth)
+            targetLabel.Text = "🎯 ล็อกหัว: " .. targetHead.Parent.Name
+            targetLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+        else
+            targetLabel.Text = "🎯 เป้าหมาย: ไม่มี"
+            targetLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
     end
 end)
+
+speedBtn.button.MouseButton1Click:Connect(function()
+    speedEnabled = not speedEnabled
+    speedBtn.toggle(speedEnabled)
+    currentSpeed = speedEnabled and 100 or normalSpeed
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = currentSpeed
+        speedLabel.Text = "⚡ ความเร็ว: " .. currentSpeed
+    end
+end)
+
+invisibleBtn.button.MouseButton1Click:Connect(function()
+    invisibleEnabled = not invisibleEnabled
+    invisibleBtn.toggle(invisibleEnabled)
+    if player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = invisibleEnabled and 1 or 0
+            end
+        end
+        if player.Character:FindFirstChild("Head") then
+            local nameTag = player.Character.Head:FindFirstChildWhichIsA("BillboardGui")
+            if nameTag then nameTag.Enabled = not invisibleEnabled end
+        end
+    end
+end)
+
+player.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    if invisibleEnabled then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then part.Transparency = 1 end
+        end
+        if char:FindFirstChild("Head") then
+            local nameTag = char.Head:FindFirstChildWhichIsA("BillboardGui")
+            if nameTag then nameTag.Enabled = false end
+        end
+    end
+    if speedEnabled then
+        char:WaitForChild("Humanoid").WalkSpeed = currentSpeed
+    end
+    if noclipEnabled then
+        if noclipConn then noclipConn:Disconnect() end
+        task.wait(0.2)
+        noclipEnabled = true
+        noclipBtn.toggle(true)
+        noclipConn = RunService.Heartbeat:Connect(function()
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end)
+    end
+end)
+
+bringBtn.button.MouseButton1Click:Connect(function()
+    bringEnabled = not bringEnabled
+    bringBtn.toggle(bringEnabled)
+end)
+
+RunService.Heartbeat:Connect(function()
+    if bringEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local myPos = player.Character.HumanoidRootPart.Position
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                p.Character.HumanoidRootPart.CFrame = CFrame.new(myPos + Vector3.new(math.random(-5,5), 0, math.random(-5,5)))
+            end
+        end
+    end
+end)
+
+killAllBtn.button.MouseButton1Click:Connect(function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
+            p.Character.Humanoid.Health = 0
+        end
+    end
+    killAllBtn.status.Text = "ฆ่าทุกคนแล้ว!"
+    task.wait(1.5)
+    killAllBtn.status.Text = "ปิดอยู่"
+    killAllBtn.status.TextColor3 = Color3.fromRGB(255, 100, 100)
+end)
+
+wallbangBtn.button.MouseButton1Click:Connect(function()
+    wallbangEnabled = not wallbangEnabled
+    wallbangBtn.toggle(wallbangEnabled)
+end)
+
+RunService.Heartbeat:Connect(function()
+    if wallbangEnabled then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and (obj.Material == Enum.Material.Concrete or obj.Material == Enum.Material.Brick or obj.Material == Enum.Material.Wood or obj.Material == Enum.Material.Metal) and obj.CanCollide then
+                obj.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- Teleport Menu (เหมือนเดิม)
+local tpMenu = Instance.new("Frame")
+tpMenu.Size = UDim2.new(0, 250, 0, 300)
+tpMenu.Position = UDim2.new(0.5, -125, 0.5, -150)
+tpMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+tpMenu.Visible = false
+tpMenu.Parent = screenGui
+
+local tpCorner = Instance.new("UICorner")
+tpCorner.CornerRadius = UDim.new(0, 15)
+tpCorner.Parent = tpMenu
+
+local tpTitle = Instance.new("TextLabel")
+tpTitle.Size = UDim2.new(1,0,0,40)
+tpTitle.BackgroundColor3 = Color3.fromRGB(25,25,40)
+tpTitle.Text = "🌀 เลือกผู้เล่น"
+tpTitle.TextColor3 = Color3.fromRGB(0,255,150)
+tpTitle.Font = Enum.Font.GothamBold
+tpTitle.Parent = tpMenu
+
+local tpScroll = Instance.new("ScrollingFrame")
+tpScroll.Size = UDim2.new(1,-20,1,-60)
+tpScroll.Position = UDim2.new(0,10,0,50)
+tpScroll.BackgroundTransparency = 1
+tpScroll.ScrollBarThickness = 6
+tpScroll.Parent = tpMenu
+
+local function refreshTP()
+    for _, c in pairs(tpScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+    local y = 5
+    local count = 0
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            count = count + 1
+            local dist = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and math.floor((player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude) or 0
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1,-10,0,40)
+            btn.Position = UDim2.new(0,5,0,y)
+            btn.BackgroundColor3 = Color3.fromRGB(35,35,50)
+            btn.Text = p.Name .. " (" .. dist .. "m)"
+            btn.TextColor3 = Color3.fromRGB(200,200,220)
+            btn.Font = Enum.Font.Gotham
+            btn.Parent = tpScroll
+            local bc = Instance.new("UICorner")
+            bc.CornerRadius = UDim.new(0,8)
+            bc.Parent = btn
+            btn.MouseButton1Click:Connect(function()
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 2, 3)
+                end
+            end)
+            y = y + 45
+        end
+    end
+    tpScroll.CanvasSize = UDim2.new(0,0,0,y)
+    tpTitle.Text = "🌀 ผู้เล่น (" .. count .. ")"
+end
+
+teleportBtn.button.MouseButton1Click:Connect(function()
+    tpMenu.Visible = not tpMenu.Visible
+    teleportBtn.toggle(tpMenu.Visible)
+    if tpMenu.Visible then refreshTP() end
+end)
+
+task.spawn(function()
+    while task.wait(2) do
+        if tpMenu.Visible then refreshTP() end
+    end
+end)
+
+-- Notification
+local function notify(text, dur)
+    local n = Instance.new("Frame")
+    n.Size = UDim2.new(0,300,0,60)
+    n.Position = UDim2.new(0.5,-150,0,-70)
+    n.BackgroundColor3 = Color3.fromRGB(30,30,45)
+    n.Parent = screenGui
+    local nc = Instance.new("UICorner")
+    nc.CornerRadius = UDim.new(0,12)
+    nc.Parent = n
+    local ns = Instance.new("UIStroke")
+    ns.Color = Color3.fromRGB(0,255,150)
+    ns.Thickness = 2
+    ns.Parent = n
+    local nt = Instance.new("TextLabel")
+    nt.Size = UDim2.new(1,-20,1,0)
+    nt.Position = UDim2.new(0,10,0,0)
+    nt.BackgroundTransparency = 1
+    nt.Text = text
+    nt.TextColor3 = Color3.new(1,1,1)
+    nt.TextSize = 14
+    nt.Font = Enum.Font.GothamBold
+    nt.TextWrapped = true
+    nt.Parent = n
+    tween(n, {Position = UDim2.new(0.5,-150,0,20)}, 0.5)
+    task.wait(dur or 3)
+    tween(n, {Position = UDim2.new(0.5,-150,0,-70)}, 0.5)
+    task.wait(0.5)
+    n:Destroy()
+end
+
+notify("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ!\nUI ใหม่สวยงาม เรียบร้อย\nกด F เพื่อพับ/กางเมนู", 6)
+
+print("🇹🇭 Thai Exploit Premium v2.5 (Fixed UI) - โหลดสำเร็จ 100% (01 ม.ค. 2026)")
