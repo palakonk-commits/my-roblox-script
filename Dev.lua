@@ -15,7 +15,7 @@ local speedEnabled = false
 local noclipEnabled = false
 local espEnabled = false
 local aimbotEnabled = false
-local aimbotFOV = 200  -- FOV สำหรับ Aimbot
+local aimbotFOV = 200
 local aimbotSmooth = 8
 local invisibleEnabled = false
 local bringEnabled = false
@@ -24,22 +24,22 @@ local noReloadEnabled = false
 local isCollapsed = false
 
 -- ScreenGui
-local screenGui = Instance. new("ScreenGui")
+local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ThaiExploitPremium"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- Tween Helper
+-- Tween Helper (ประกาศก่อนใช้)
 local function tween(obj, props, time)
-    TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle. Quint), props):Play()
+    TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quint), props):Play()
 end
 
--- Intro overlay (โหลดเสร็จก่อน)
+-- Intro overlay
 local function playIntro(callback)
     local introFrame = Instance.new("Frame")
     introFrame.Size = UDim2.new(0, 500, 0, 300)
-    introFrame.Position = UDim2.new(0. 5, -250, 0.5, -150)
+    introFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
     introFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
     introFrame.BorderSizePixel = 0
     introFrame.ZIndex = 100
@@ -73,7 +73,7 @@ local function playIntro(callback)
     introSubtitle.TextColor3 = Color3.fromRGB(180, 200, 220)
     introSubtitle.TextTransparency = 1
     introSubtitle.TextSize = 16
-    introSubtitle.Font = Enum.Font. Gotham
+    introSubtitle.Font = Enum.Font.Gotham
     introSubtitle.ZIndex = 101
     introSubtitle.Parent = introFrame
 
@@ -95,42 +95,43 @@ local function playIntro(callback)
     fill.BackgroundColor3 = Color3.fromRGB(0, 255, 170)
     fill.BackgroundTransparency = 0.1
     fill.BorderSizePixel = 0
-    fill. ZIndex = 102
+    fill.ZIndex = 102
     fill.Parent = bar
 
-    local fillCorner = Instance. new("UICorner")
+    local fillCorner = Instance.new("UICorner")
     fillCorner.CornerRadius = UDim.new(1, 0)
     fillCorner.Parent = fill
 
     tween(introTitle, {TextTransparency = 0}, 0.3)
     tween(introSubtitle, {TextTransparency = 0}, 0.35)
-    tween(fill, {Size = UDim2.new(1, 0, 1, 0)}, 1. 05)
+    tween(fill, {Size = UDim2.new(1, 0, 1, 0)}, 1.05)
 
-    task.wait(1. 2)
-    tween(introTitle, {TextTransparency = 1}, 0.35)
-    tween(introSubtitle, {TextTransparency = 1}, 0.35)
-    tween(bar, {BackgroundTransparency = 1}, 0.35)
-    tween(fill, {BackgroundTransparency = 1}, 0.35)
-    tween(introFrame, {BackgroundTransparency = 1}, 0.45)
-    task.wait(0.5)
-    introFrame: Destroy()
-    if callback then callback() end
+    task.delay(1.8, function()
+        tween(introTitle, {TextTransparency = 1}, 0.35)
+        tween(introSubtitle, {TextTransparency = 1}, 0.35)
+        tween(bar, {BackgroundTransparency = 1}, 0.35)
+        tween(fill, {BackgroundTransparency = 1}, 0.35)
+        tween(introFrame, {BackgroundTransparency = 1}, 0.45)
+        task.wait(0.5)
+        introFrame:Destroy()
+        if callback then callback() end
+    end)
 end
 
--- Main Frame (ซ่อนก่อน)
-local mainFrame = Instance. new("Frame")
+-- Main Frame
+local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 900, 0, 450)
 mainFrame.Position = UDim2.new(0.5, -450, 0.5, -225)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Active = true
-mainFrame. Draggable = true
-mainFrame. Visible = false
+mainFrame.Draggable = true
+mainFrame.Visible = false
 mainFrame.Parent = screenGui
 
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim. new(0, 20)
+mainCorner.CornerRadius = UDim.new(0, 20)
 mainCorner.Parent = mainFrame
 
 local gradient = Instance.new("UIGradient")
@@ -143,7 +144,6 @@ gradient.Parent = mainFrame
 
 local border = Instance.new("UIStroke")
 border.Thickness = 3
-border.Color = Color3.fromRGB(0, 255, 170)
 border.Parent = mainFrame
 task.spawn(function()
     local h = 0
@@ -161,7 +161,7 @@ headerFrame.BorderSizePixel = 0
 headerFrame.Parent = mainFrame
 
 local headerCorner = Instance.new("UICorner")
-headerCorner.CornerRadius = UDim. new(0, 20)
+headerCorner.CornerRadius = UDim.new(0, 20)
 headerCorner.Parent = headerFrame
 
 local logo = Instance.new("TextLabel")
@@ -169,7 +169,7 @@ logo.Size = UDim2.new(0, 60, 0, 60)
 logo.Position = UDim2.new(0, 15, 0, 5)
 logo.BackgroundTransparency = 1
 logo.Text = "🇹🇭"
-logo. TextSize = 40
+logo.TextSize = 40
 logo.Font = Enum.Font.GothamBold
 logo.Parent = headerFrame
 
@@ -191,11 +191,11 @@ subtitle.BackgroundTransparency = 1
 subtitle.Text = "v2.5 - 2026 | FOV Aimbot Edition"
 subtitle.TextColor3 = Color3.fromRGB(150, 150, 180)
 subtitle.TextSize = 13
-subtitle.Font = Enum. Font. Gotham
+subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = headerFrame
 
--- Collapse Button
+-- Buttons
 local collapseButton = Instance.new("TextButton")
 collapseButton.Size = UDim2.new(0, 40, 0, 40)
 collapseButton.Position = UDim2.new(1, -100, 0, 15)
@@ -210,23 +210,22 @@ local collapseCorner = Instance.new("UICorner")
 collapseCorner.CornerRadius = UDim.new(0, 8)
 collapseCorner.Parent = collapseButton
 
--- Close Button
-local closeButton = Instance. new("TextButton")
+local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 40, 0, 40)
 closeButton.Position = UDim2.new(1, -50, 0, 15)
 closeButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 closeButton.Text = "✕"
 closeButton.TextColor3 = Color3.new(1, 1, 1)
 closeButton.TextSize = 20
-closeButton.Font = Enum.Font. GothamBold
+closeButton.Font = Enum.Font.GothamBold
 closeButton.Parent = headerFrame
 
 local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = closeButton
 
--- Content Frame (ScrollingFrame)
-local contentFrame = Instance. new("ScrollingFrame")
+-- Content
+local contentFrame = Instance.new("ScrollingFrame")
 contentFrame.Size = UDim2.new(1, -30, 1, -150)
 contentFrame.Position = UDim2.new(0, 15, 0, 80)
 contentFrame.BackgroundTransparency = 1
@@ -234,22 +233,19 @@ contentFrame.ScrollBarThickness = 8
 contentFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 170)
 contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.XY
-contentFrame.ScrollingDirection = Enum.ScrollingDirection. XY
+contentFrame.ScrollingDirection = Enum.ScrollingDirection.XY
 contentFrame.Parent = mainFrame
 
 local contentGrid = Instance.new("UIGridLayout")
 contentGrid.CellSize = UDim2.new(0, 165, 0, 120)
 contentGrid.CellPadding = UDim2.new(0, 25, 0, 25)
-contentGrid.FillDirection = Enum.FillDirection. Horizontal
 contentGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-contentGrid.VerticalAlignment = Enum.VerticalAlignment.Top
 contentGrid.SortOrder = Enum.SortOrder.LayoutOrder
 contentGrid.Parent = contentFrame
 
 -- สร้างปุ่ม
 local function createButton(name, icon)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 165, 0, 120)
     frame.BackgroundColor3 = Color3.fromRGB(32, 32, 48)
     frame.Parent = contentFrame
 
@@ -259,7 +255,7 @@ local function createButton(name, icon)
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(70, 70, 95)
-    stroke.Thickness = 1. 5
+    stroke.Thickness = 1.5
     stroke.Parent = frame
 
     local iconLabel = Instance.new("TextLabel")
@@ -279,15 +275,15 @@ local function createButton(name, icon)
     textLabel.TextSize = 13
     textLabel.Font = Enum.Font.GothamBold
     textLabel.TextWrapped = true
-    textLabel. TextXAlignment = Enum.TextXAlignment.Center
-    textLabel. Parent = frame
+    textLabel.TextXAlignment = Enum.TextXAlignment.Center
+    textLabel.Parent = frame
 
     local statusLabel = Instance.new("TextLabel")
     statusLabel.Size = UDim2.new(1, 0, 0, 16)
     statusLabel.Position = UDim2.new(0, 0, 0, 78)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = "ปิดอยู่"
-    statusLabel. TextColor3 = Color3.fromRGB(255, 100, 100)
+    statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     statusLabel.TextSize = 10
     statusLabel.Font = Enum.Font.Gotham
     statusLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -317,7 +313,7 @@ local function createButton(name, icon)
     button.Size = UDim2.new(1, 0, 1, 0)
     button.BackgroundTransparency = 1
     button.Text = ""
-    button. Parent = frame
+    button.Parent = frame
 
     local active = false
     local function toggle(state)
@@ -337,14 +333,8 @@ local function createButton(name, icon)
         end
     end
 
-    button.MouseEnter:Connect(function() 
-        tween(frame, {BackgroundColor3 = Color3.fromRGB(45, 45, 68)}, 0.2) 
-    end)
-    button.MouseLeave:Connect(function() 
-        if not active then 
-            tween(frame, {BackgroundColor3 = Color3.fromRGB(32, 32, 48)}, 0.2) 
-        end 
-    end)
+    button.MouseEnter:Connect(function() tween(frame, {BackgroundColor3 = Color3.fromRGB(45, 45, 68)}, 0.2) end)
+    button.MouseLeave:Connect(function() if not active then tween(frame, {BackgroundColor3 = Color3.fromRGB(32, 32, 48)}, 0.2) end end)
 
     return {button = button, toggle = toggle, status = statusLabel}
 end
@@ -360,7 +350,7 @@ local wallbangBtn = createButton("Wallbang", "🔫")
 local noReloadBtn = createButton("No Reload", "∞")
 local teleportBtn = createButton("Teleport", "🌀")
 
--- Info Labels (ที่ด้านล่าง)
+-- Info Panel
 local infoFrame = Instance.new("Frame")
 infoFrame.Size = UDim2.new(1, 0, 0, 80)
 infoFrame.Position = UDim2.new(0, 0, 1, -80)
@@ -378,7 +368,7 @@ targetLabel.Size = UDim2.new(0.33, -10, 0, 22)
 targetLabel.BackgroundTransparency = 1
 targetLabel.Text = "🎯 เป้าหมาย: ไม่มี"
 targetLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
-targetLabel.Font = Enum.Font. Gotham
+targetLabel.Font = Enum.Font.Gotham
 targetLabel.TextSize = 12
 targetLabel.TextXAlignment = Enum.TextXAlignment.Left
 targetLabel.Parent = infoFrame
@@ -398,7 +388,7 @@ local playersLabel = Instance.new("TextLabel")
 playersLabel.Position = UDim2.new(0.66, 10, 0, 5)
 playersLabel.Size = UDim2.new(0.33, -10, 0, 22)
 playersLabel.BackgroundTransparency = 1
-playersLabel.Text = "👥 ผู้เล่น: " .. #Players: GetPlayers()
+playersLabel.Text = "👥 ผู้เล่น: 0"
 playersLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
 playersLabel.Font = Enum.Font.Gotham
 playersLabel.TextSize = 12
@@ -409,20 +399,20 @@ local fovLabel = Instance.new("TextLabel")
 fovLabel.Position = UDim2.new(0, 20, 0, 35)
 fovLabel.Size = UDim2.new(0.5, -10, 0, 20)
 fovLabel.BackgroundTransparency = 1
-fovLabel.Text = "🔍 Aimbot FOV: " .. aimbotFOV ..  " pixels"
+fovLabel.Text = "🔍 Aimbot FOV: 200 pixels"
 fovLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
 fovLabel.Font = Enum.Font.Gotham
 fovLabel.TextSize = 11
-fovLabel.TextXAlignment = Enum.TextXAlignment. Left
+fovLabel.TextXAlignment = Enum.TextXAlignment.Left
 fovLabel.Parent = infoFrame
 
 local smoothLabel = Instance.new("TextLabel")
 smoothLabel.Position = UDim2.new(0.5, 10, 0, 35)
 smoothLabel.Size = UDim2.new(0.5, -10, 0, 20)
 smoothLabel.BackgroundTransparency = 1
-smoothLabel.Text = "📊 Aimbot Smooth: " .. aimbotSmooth
+smoothLabel.Text = "📊 Aimbot Smooth: 8"
 smoothLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
-smoothLabel.Font = Enum. Font.Gotham
+smoothLabel.Font = Enum.Font.Gotham
 smoothLabel.TextSize = 11
 smoothLabel.TextXAlignment = Enum.TextXAlignment.Left
 smoothLabel.Parent = infoFrame
@@ -442,12 +432,11 @@ miniIcon.Visible = false
 miniIcon.Parent = screenGui
 
 local miniCorner = Instance.new("UICorner")
-miniCorner.CornerRadius = UDim. new(0, 18)
+miniCorner.CornerRadius = UDim.new(0, 18)
 miniCorner.Parent = miniIcon
 
 local miniBorder = Instance.new("UIStroke")
-miniBorder. Thickness = 3
-miniBorder.Color = Color3.fromRGB(0, 255, 170)
+miniBorder.Thickness = 3
 miniBorder.Parent = miniIcon
 
 local miniLogo = Instance.new("TextLabel")
@@ -463,23 +452,20 @@ miniBtn.Size = UDim2.new(1, 0, 1, 0)
 miniBtn.BackgroundTransparency = 1
 miniBtn.Parent = miniIcon
 
--- Collapse
+-- Collapse Logic
 local function toggleCollapse()
     isCollapsed = not isCollapsed
     if isCollapsed then
         collapseButton.Text = "▶"
-        tween(mainFrame, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0, -900, 0.5, -225)}, 0.4)
+        tween(mainFrame, {Position = UDim2.new(0, -1000, 0.5, -225)}, 0.4)
         task.wait(0.4)
-        mainFrame. Visible = false
+        mainFrame.Visible = false
         miniIcon.Visible = true
-        tween(miniIcon, {Size = UDim2.new(0, 70, 0, 70)}, 0.4)
     else
         collapseButton.Text = "◀"
-        tween(miniIcon, {Size = UDim2.new(0, 0, 0, 0)}, 0.4)
-        task.wait(0.4)
         miniIcon.Visible = false
         mainFrame.Visible = true
-        tween(mainFrame, {Size = UDim2.new(0, 900, 0, 450), Position = UDim2.new(0.5, -450, 0.5, -225)}, 0.4)
+        tween(mainFrame, {Position = UDim2.new(0.5, -450, 0.5, -225)}, 0.4)
     end
 end
 
@@ -489,15 +475,16 @@ closeButton.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
-    if input.KeyCode == Enum.KeyCode. F then toggleCollapse() end
+    if input.KeyCode == Enum.KeyCode.F then toggleCollapse() end
 end)
 
--- แสดง mainFrame หลัง intro เสร็จ
+-- แสดง GUI หลัง intro เสร็จ
 playIntro(function()
     mainFrame.Visible = true
+    tween(mainFrame, {BackgroundTransparency = 0}, 0.5)
 end)
 
--- Noclip
+-- ฟังก์ชันต่าง ๆ (เหมือนเดิม แต่แก้ bug เล็กน้อย)
 local noclipConn
 noclipBtn.button.MouseButton1Click:Connect(function()
     noclipEnabled = not noclipEnabled
@@ -506,7 +493,7 @@ noclipBtn.button.MouseButton1Click:Connect(function()
         noclipConn = RunService.Heartbeat:Connect(function()
             if player.Character then
                 for _, v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then v. CanCollide = false end
+                    if v:IsA("BasePart") then v.CanCollide = false end
                 end
             end
         end)
@@ -515,15 +502,14 @@ noclipBtn.button.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP
 local highlights = {}
 local function updateESP()
     if espEnabled then
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= player and p.Character and not highlights[p] then
                 local hl = Instance.new("Highlight")
-                hl.FillColor = Color3.fromRGB(255, 0, 0)
-                hl.OutlineColor = Color3.fromRGB(255, 255, 0)
+                hl.FillColor = Color3.fromRGB(255,0,0)
+                hl.OutlineColor = Color3.fromRGB(255,255,0)
                 hl.FillTransparency = 0.5
                 hl.Parent = p.Character
                 highlights[p] = hl
@@ -534,11 +520,13 @@ local function updateESP()
         highlights = {}
     end
 end
+
 espBtn.button.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     espBtn.toggle(espEnabled)
     updateESP()
 end)
+
 Players.PlayerAdded:Connect(function(p)
     if espEnabled then
         p.CharacterAdded:Connect(function()
@@ -548,13 +536,12 @@ Players.PlayerAdded:Connect(function(p)
     end
 end)
 
--- Aimbot ด้วย FOV Circle
 local fovCircle = Drawing.new("Circle")
 fovCircle.Radius = aimbotFOV
-fovCircle. Thickness = 2
-fovCircle.Color = Color3.fromRGB(0, 255, 150)
+fovCircle.Thickness = 2
+fovCircle.Color = Color3.fromRGB(0,255,150)
 fovCircle.Transparency = 0.6
-fovCircle. Visible = false
+fovCircle.Visible = false
 
 aimbotBtn.button.MouseButton1Click:Connect(function()
     aimbotEnabled = not aimbotEnabled
@@ -582,7 +569,7 @@ local function getClosestHead()
     local shortest = aimbotFOV
     local mPos = Vector2.new(mouse.X, mouse.Y + 36)
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid. Health > 0 then
+        if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
             local head = p.Character.Head
             local pos, visible = Camera:WorldToViewportPoint(head.Position)
             if visible then
@@ -603,7 +590,7 @@ RunService.RenderStepped:Connect(function()
         if aimbotLock then
             local targetHead = getClosestHead()
             if targetHead then
-                Camera. CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetHead.Position), 1 / aimbotSmooth)
+                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetHead.Position), 1 / aimbotSmooth)
                 targetLabel.Text = "🎯 ล็อกหัว: " .. targetHead.Parent.Name
                 targetLabel.TextColor3 = Color3.fromRGB(100, 255, 170)
             else
@@ -614,25 +601,24 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Speed
+-- ส่วนที่เหลือเหมือนเดิม (Speed, Invisible, Bring, Kill All, Wallbang, No Reload, Teleport, Notify)
 speedBtn.button.MouseButton1Click:Connect(function()
     speedEnabled = not speedEnabled
     speedBtn.toggle(speedEnabled)
     currentSpeed = speedEnabled and 100 or normalSpeed
     if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player. Character.Humanoid.WalkSpeed = currentSpeed
+        player.Character.Humanoid.WalkSpeed = currentSpeed
         speedLabel.Text = "⚡ ความเร็ว: " .. currentSpeed
     end
 end)
 
--- Invisible
 invisibleBtn.button.MouseButton1Click:Connect(function()
     invisibleEnabled = not invisibleEnabled
-    invisibleBtn. toggle(invisibleEnabled)
+    invisibleBtn.toggle(invisibleEnabled)
     if player.Character then
         for _, part in pairs(player.Character:GetDescendants()) do
             if part:IsA("BasePart") or part:IsA("Decal") then
-                part. Transparency = invisibleEnabled and 1 or 0
+                part.Transparency = invisibleEnabled and 1 or 0
             end
         end
         if player.Character:FindFirstChild("Head") then
@@ -654,14 +640,14 @@ player.CharacterAdded:Connect(function(char)
         end
     end
     if speedEnabled then
-        char: WaitForChild("Humanoid").WalkSpeed = currentSpeed
+        char:WaitForChild("Humanoid").WalkSpeed = currentSpeed
     end
     if noclipEnabled then
         if noclipConn then noclipConn:Disconnect() end
         task.wait(0.2)
         noclipEnabled = true
         noclipBtn.toggle(true)
-        noclipConn = RunService. Heartbeat:Connect(function()
+        noclipConn = RunService.Heartbeat:Connect(function()
             for _, v in pairs(char:GetDescendants()) do
                 if v:IsA("BasePart") then v.CanCollide = false end
             end
@@ -669,7 +655,6 @@ player.CharacterAdded:Connect(function(char)
     end
 end)
 
--- Bring
 bringBtn.button.MouseButton1Click:Connect(function()
     bringEnabled = not bringEnabled
     bringBtn.toggle(bringEnabled)
@@ -679,18 +664,17 @@ RunService.Heartbeat:Connect(function()
     if bringEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local myPos = player.Character.HumanoidRootPart.Position
         for _, p in pairs(Players:GetPlayers()) do
-            if p ~= player and p.Character and p. Character:FindFirstChild("HumanoidRootPart") then
-                p.Character.HumanoidRootPart.CFrame = CFrame.new(myPos + Vector3.new(math.random(-5, 5), 0, math.random(-5, 5)))
+            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                p.Character.HumanoidRootPart.CFrame = CFrame.new(myPos + Vector3.new(math.random(-5,5), 0, math.random(-5,5)))
             end
         end
     end
 end)
 
--- Kill All
 killAllBtn.button.MouseButton1Click:Connect(function()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
-            p. Character.Humanoid. Health = 0
+            p.Character.Humanoid.Health = 0
         end
     end
     killAllBtn.status.Text = "ฆ่าทุกคนแล้ว!"
@@ -699,24 +683,22 @@ killAllBtn.button.MouseButton1Click:Connect(function()
     killAllBtn.status.TextColor3 = Color3.fromRGB(255, 100, 100)
 end)
 
--- Wallbang
 wallbangBtn.button.MouseButton1Click:Connect(function()
     wallbangEnabled = not wallbangEnabled
     wallbangBtn.toggle(wallbangEnabled)
 end)
 
 RunService.Heartbeat:Connect(function()
-    if wallbangEnabled and player.Character then
+    if wallbangEnabled then
         for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and (obj.Material == Enum.Material.Concrete or obj.Material == Enum. Material.Brick or obj.Material == Enum.Material.Wood or obj.Material == Enum.Material.Metal) and obj. CanCollide then
-                obj. CanCollide = false
+            if obj:IsA("BasePart") and (obj.Material == Enum.Material.Concrete or obj.Material == Enum.Material.Brick or obj.Material == Enum.Material.Wood or obj.Material == Enum.Material.Metal) and obj.CanCollide then
+                obj.CanCollide = false
             end
         end
     end
 end)
 
--- No Reload
-noReloadBtn.button. MouseButton1Click:Connect(function()
+noReloadBtn.button.MouseButton1Click:Connect(function()
     noReloadEnabled = not noReloadEnabled
     noReloadBtn.toggle(noReloadEnabled)
 end)
@@ -726,7 +708,7 @@ RunService.Heartbeat:Connect(function()
         local tool = player.Character:FindFirstChildOfClass("Tool")
         if tool then
             for _, v in pairs(tool:GetDescendants()) do
-                if v:IsA("IntValue") and (v.Name == "Ammo" or v.Name == "Clip" or v.Name == "Magazine") then
+                if (v:IsA("IntValue") or v:IsA("NumberValue")) and (v.Name:lower():find("ammo") or v.Name:lower():find("clip") or v.Name:lower():find("mag")) then
                     v.Value = math.huge
                 end
             end
@@ -734,13 +716,13 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Teleport Menu
+-- Teleport Menu (เหมือนเดิม)
 local tpMenu = Instance.new("Frame")
 tpMenu.Size = UDim2.new(0, 280, 0, 350)
-tpMenu.Position = UDim2.new(0. 5, 200, 0.5, -175)
+tpMenu.Position = UDim2.new(0.5, 200, 0.5, -175)
 tpMenu.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-tpMenu. Visible = false
-tpMenu. Parent = screenGui
+tpMenu.Visible = false
+tpMenu.Parent = screenGui
 
 local tpCorner = Instance.new("UICorner")
 tpCorner.CornerRadius = UDim.new(0, 18)
@@ -757,7 +739,7 @@ tpTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
 tpTitle.Text = "🌀 เลือกผู้เล่น"
 tpTitle.TextColor3 = Color3.fromRGB(0, 255, 170)
 tpTitle.Font = Enum.Font.GothamBold
-tpTitle. TextSize = 16
+tpTitle.TextSize = 16
 tpTitle.Parent = tpMenu
 
 local tpTitleCorner = Instance.new("UICorner")
@@ -772,39 +754,39 @@ tpScroll.ScrollBarThickness = 6
 tpScroll.Parent = tpMenu
 
 local function refreshTP()
-    for _, c in pairs(tpScroll: GetChildren()) do if c:IsA("TextButton") then c: Destroy() end end
+    for _, c in pairs(tpScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
     local y = 5
     local count = 0
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             count = count + 1
-            local dist = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and math.floor((player.Character.HumanoidRootPart.Position - p. Character.HumanoidRootPart.Position).Magnitude) or 0
+            local dist = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and math.floor((player.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude) or 0
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, -10, 0, 42)
             btn.Position = UDim2.new(0, 5, 0, y)
             btn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-            btn.Text = p.Name ..  " (" .. dist .. "m)"
+            btn.Text = p.Name .. " (" .. dist .. "m)"
             btn.TextColor3 = Color3.fromRGB(200, 200, 220)
-            btn.Font = Enum.Font. Gotham
+            btn.Font = Enum.Font.Gotham
             btn.TextSize = 12
             btn.Parent = tpScroll
             local bc = Instance.new("UICorner")
             bc.CornerRadius = UDim.new(0, 8)
             bc.Parent = btn
             btn.MouseButton1Click:Connect(function()
-                if p. Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 2, 3)
                 end
             end)
             y = y + 47
         end
     end
-    tpScroll. CanvasSize = UDim2.new(0, 0, 0, y)
+    tpScroll.CanvasSize = UDim2.new(0, 0, 0, y)
     tpTitle.Text = "🌀 ผู้เล่น (" .. count .. ")"
 end
 
 teleportBtn.button.MouseButton1Click:Connect(function()
-    tpMenu. Visible = not tpMenu. Visible
+    tpMenu.Visible = not tpMenu.Visible
     teleportBtn.toggle(tpMenu.Visible)
     if tpMenu.Visible then refreshTP() end
 end)
@@ -822,13 +804,16 @@ local function notify(text, dur)
     n.Position = UDim2.new(0.5, -175, 0, -80)
     n.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
     n.Parent = screenGui
+
     local nc = Instance.new("UICorner")
-    nc.CornerRadius = UDim. new(0, 14)
+    nc.CornerRadius = UDim.new(0, 14)
     nc.Parent = n
+
     local ns = Instance.new("UIStroke")
     ns.Color = Color3.fromRGB(0, 255, 170)
     ns.Thickness = 2
     ns.Parent = n
+
     local nt = Instance.new("TextLabel")
     nt.Size = UDim2.new(1, -20, 1, 0)
     nt.Position = UDim2.new(0, 10, 0, 0)
@@ -839,13 +824,14 @@ local function notify(text, dur)
     nt.Font = Enum.Font.GothamBold
     nt.TextWrapped = true
     nt.Parent = n
+
     tween(n, {Position = UDim2.new(0.5, -175, 0, 20)}, 0.5)
     task.wait(dur or 4)
     tween(n, {Position = UDim2.new(0.5, -175, 0, -80)}, 0.5)
     task.wait(0.5)
-    n: Destroy()
+    n:Destroy()
 end
 
-notify("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ!\n✓ FOV Aimbot Circle\n✓ UI Spacing ปรับปรุง\n✓ No Reload Enhanced\nกด F เพื่อพับ UI", 5)
+notify("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ!\n✓ แก้บั๊กไม่ขึ้น GUI\n✓ FOV Aimbot + Circle\n✓ UI สวย ระยะห่างดี\nกด F เพื่อพับเมนู", 6)
 
-print("🇹🇭 Thai Exploit Premium v2.5 - FOV Edition โหลดเสร็จ (2 ม. ค. 2026)")
+print("🇹🇭 Thai Exploit Premium v2.5 - Fixed & Ready (02 Jan 2026)")
