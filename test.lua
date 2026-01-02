@@ -15,11 +15,11 @@ local speedEnabled = false
 local noclipEnabled = false
 local espEnabled = false
 local aimbotEnabled = false
-local aimbotFOV = 200
 local aimbotSmooth = 8
 local invisibleEnabled = false
 local bringEnabled = false
 local wallbangEnabled = false
+local noReloadEnabled = false  -- ฟังก์ชันใหม่: ยิงไม่ต้องรีโหลด (Infinite Ammo/No Reload)
 local isCollapsed = false
 
 -- ScreenGui
@@ -29,10 +29,11 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- Intro overlay
+-- Intro overlay (ปรับขนาดให้พอดีตรงกลาง ไม่เต็มจอ)
 local function playIntro()
     local introFrame = Instance.new("Frame")
-    introFrame.Size = UDim2.fromScale(1, 1)
+    introFrame.Size = UDim2.new(0, 500, 0, 300)
+    introFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
     introFrame.BackgroundColor3 = Color3.fromRGB(8, 10, 16)
     introFrame.BorderSizePixel = 0
     introFrame.ZIndex = 100
@@ -48,7 +49,7 @@ local function playIntro()
 
     local introTitle = Instance.new("TextLabel")
     introTitle.Size = UDim2.new(1, 0, 0, 40)
-    introTitle.Position = UDim2.new(0, 0, 0.4, -20)
+    introTitle.Position = UDim2.new(0, 0, 0.3, -20)
     introTitle.BackgroundTransparency = 1
     introTitle.Text = "ยินดีต้อนรับสู่ Thai Exploit Premium"
     introTitle.TextColor3 = Color3.fromRGB(170, 230, 255)
@@ -60,7 +61,7 @@ local function playIntro()
 
     local introSubtitle = Instance.new("TextLabel")
     introSubtitle.Size = UDim2.new(1, 0, 0, 22)
-    introSubtitle.Position = UDim2.new(0, 0, 0.4, 20)
+    introSubtitle.Position = UDim2.new(0, 0, 0.3, 20)
     introSubtitle.BackgroundTransparency = 1
     introSubtitle.Text = "กำลังเตรียม UI และฟังก์ชัน..."
     introSubtitle.TextColor3 = Color3.fromRGB(180, 200, 220)
@@ -72,7 +73,7 @@ local function playIntro()
 
     local bar = Instance.new("Frame")
     bar.Size = UDim2.new(0, 320, 0, 8)
-    bar.Position = UDim2.new(0.5, -160, 0.55, -4)
+    bar.Position = UDim2.new(0.5, -160, 0.6, -4)
     bar.BackgroundColor3 = Color3.fromRGB(35, 70, 120)
     bar.BackgroundTransparency = 0.5
     bar.BorderSizePixel = 0
@@ -117,15 +118,15 @@ end
 
 playIntro()
 
--- Tween Helper (ประกาศหลัง intro เพราะใน intro ใช้ local tween ชั่วคราว)
+-- Tween Helper
 local function tween(obj, props, time)
     TweenService:Create(obj, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quint), props):Play()
 end
 
--- Main Frame ขนาดใหญ่แนวตั้ง (แก้ UI เพี้ยน)
+-- Main Frame (แนวนอนสวยๆ)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 600)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -300)
+mainFrame.Size = UDim2.new(0, 800, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -400, 0.5, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -177,7 +178,7 @@ logo.Font = Enum.Font.GothamBold
 logo.Parent = headerFrame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0, 200, 0, 30)
+title.Size = UDim2.new(0, 140, 0, 30)
 title.Position = UDim2.new(0, 65, 0, 8)
 title.BackgroundTransparency = 1
 title.Text = "Thai Exploit"
@@ -188,17 +189,17 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = headerFrame
 
 local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(0, 200, 0, 20)
+subtitle.Size = UDim2.new(0, 140, 0, 20)
 subtitle.Position = UDim2.new(0, 65, 0, 35)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "Premium v2.5 - 2026"
+subtitle.Text = "Premium v2.5 - 2025"
 subtitle.TextColor3 = Color3.fromRGB(150, 150, 180)
 subtitle.TextSize = 11
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = headerFrame
 
--- Collapse / Close Buttons
+-- Collapse Button
 local collapseButton = Instance.new("TextButton")
 collapseButton.Size = UDim2.new(0, 35, 0, 35)
 collapseButton.Position = UDim2.new(1, -85, 0, 12.5)
@@ -213,6 +214,7 @@ local collapseCorner = Instance.new("UICorner")
 collapseCorner.CornerRadius = UDim.new(0, 8)
 collapseCorner.Parent = collapseButton
 
+-- Close Button
 local closeButton = Instance.new("TextButton")
 closeButton.Size = UDim2.new(0, 35, 0, 35)
 closeButton.Position = UDim2.new(1, -45, 0, 12.5)
@@ -227,7 +229,7 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 8)
 closeCorner.Parent = closeButton
 
--- Content ScrollingFrame (แนวตั้ง เรียบร้อย)
+-- Content (แนวนอนด้วย UIGridLayout)
 local contentFrame = Instance.new("ScrollingFrame")
 contentFrame.Size = UDim2.new(1, -20, 1, -80)
 contentFrame.Position = UDim2.new(0, 10, 0, 70)
@@ -235,19 +237,23 @@ contentFrame.BackgroundTransparency = 1
 contentFrame.ScrollBarThickness = 6
 contentFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 150)
 contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.XY
+contentFrame.ScrollingDirection = Enum.ScrollingDirection.XY
 contentFrame.Parent = mainFrame
 
-local contentLayout = Instance.new("UIListLayout")
-contentLayout.Padding = UDim.new(0, 12)
-contentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-contentLayout.Parent = contentFrame
+local contentGrid = Instance.new("UIGridLayout")
+contentGrid.CellSize = UDim2.new(0, 150, 0, 100)
+contentGrid.CellPadding = UDim2.new(0, 10, 0, 10)
+contentGrid.FillDirection = Enum.FillDirection.Horizontal
+contentGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
+contentGrid.VerticalAlignment = Enum.VerticalAlignment.Top
+contentGrid.SortOrder = Enum.SortOrder.LayoutOrder
+contentGrid.Parent = contentFrame
 
--- สร้างปุ่ม (แก้ให้เรียงแนวตั้งสวยงาม)
-local function createButton(name, icon)
+-- สร้างปุ่ม
+local function createButton(name, icon, yPos)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, -20, 0, 70)
+    frame.Size = UDim2.new(0, 150, 0, 100)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
     frame.Parent = contentFrame
 
@@ -261,38 +267,39 @@ local function createButton(name, icon)
     stroke.Parent = frame
 
     local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 50, 0, 50)
-    iconLabel.Position = UDim2.new(0, 15, 0.5, -25)
+    iconLabel.Size = UDim2.new(0, 40, 0, 40)
+    iconLabel.Position = UDim2.new(0.5, -20, 0, 10)
     iconLabel.BackgroundTransparency = 1
     iconLabel.Text = icon
-    iconLabel.TextSize = 36
+    iconLabel.TextSize = 28
     iconLabel.Parent = frame
 
     local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(0, 200, 0, 30)
-    textLabel.Position = UDim2.new(0, 75, 0, 10)
+    textLabel.Size = UDim2.new(1, 0, 0, 20)
+    textLabel.Position = UDim2.new(0, 0, 0, 50)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = name
     textLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
-    textLabel.TextSize = 16
+    textLabel.TextSize = 12
     textLabel.Font = Enum.Font.GothamBold
-    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.TextWrapped = true
+    textLabel.TextXAlignment = Enum.TextXAlignment.Center
     textLabel.Parent = frame
 
     local statusLabel = Instance.new("TextLabel")
-    statusLabel.Size = UDim2.new(0, 200, 0, 20)
-    statusLabel.Position = UDim2.new(0, 75, 0, 38)
+    statusLabel.Size = UDim2.new(1, 0, 0, 18)
+    statusLabel.Position = UDim2.new(0, 0, 0, 70)
     statusLabel.BackgroundTransparency = 1
     statusLabel.Text = "ปิดอยู่"
     statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-    statusLabel.TextSize = 12
+    statusLabel.TextSize = 11
     statusLabel.Font = Enum.Font.Gotham
-    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Center
     statusLabel.Parent = frame
 
     local switch = Instance.new("Frame")
-    switch.Size = UDim2.new(0, 60, 0, 34)
-    switch.Position = UDim2.new(1, -80, 0.5, -17)
+    switch.Size = UDim2.new(0, 50, 0, 28)
+    switch.Position = UDim2.new(0.5, -25, 1, -40)
     switch.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
     switch.Parent = frame
 
@@ -301,8 +308,8 @@ local function createButton(name, icon)
     switchCorner.Parent = switch
 
     local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 26, 0, 26)
-    knob.Position = UDim2.new(0, 4, 0.5, -13)
+    knob.Size = UDim2.new(0, 22, 0, 22)
+    knob.Position = UDim2.new(0, 3, 0.5, -11)
     knob.BackgroundColor3 = Color3.fromRGB(200, 200, 220)
     knob.Parent = switch
 
@@ -320,13 +327,13 @@ local function createButton(name, icon)
     local function toggle(state)
         active = state ~= nil and state or not active
         if active then
-            tween(knob, {Position = UDim2.new(1, -30, 0.5, -13)}, 0.3)
+            tween(knob, {Position = UDim2.new(1, -25, 0.5, -11)}, 0.3)
             tween(switch, {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}, 0.3)
             tween(stroke, {Color = Color3.fromRGB(0, 255, 150)}, 0.3)
             statusLabel.Text = "เปิดอยู่"
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
         else
-            tween(knob, {Position = UDim2.new(0, 4, 0.5, -13)}, 0.3)
+            tween(knob, {Position = UDim2.new(0, 3, 0.5, -11)}, 0.3)
             tween(switch, {BackgroundColor3 = Color3.fromRGB(80, 80, 100)}, 0.3)
             tween(stroke, {Color = Color3.fromRGB(60, 60, 80)}, 0.3)
             statusLabel.Text = "ปิดอยู่"
@@ -342,45 +349,45 @@ end
 
 local noclipBtn = createButton("Noclip", "🧱")
 local espBtn = createButton("ESP", "👁️")
-local aimbotBtn = createButton("Aimbot (Head Only)", "🎯")
+local aimbotBtn = createButton("Aimbot", "🎯")
 local speedBtn = createButton("Speed", "⚡")
-local invisibleBtn = createButton("ล่องหน (Invisible)", "👻")
-local bringBtn = createButton("ดึงผู้เล่นมาหา (Bring)", "🧲")
+local invisibleBtn = createButton("Invisible", "👻")
+local bringBtn = createButton("Bring", "🧲")
 local killAllBtn = createButton("Kill All", "💀")
-local wallbangBtn = createButton("ยิงทะลุ (Wallbang)", "🔫")
+local wallbangBtn = createButton("Wallbang", "🔫")
+local noReloadBtn = createButton("No Reload", "∞")  -- ปุ่มใหม่สำหรับ No Reload
 local teleportBtn = createButton("Teleport", "🌀")
 
--- Info Labels (วางใต้ปุ่มทั้งหมด)
-local infoSeparator = Instance.new("Frame")
-infoSeparator.Size = UDim2.new(1, -40, 0, 2)
-infoSeparator.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-infoSeparator.BorderSizePixel = 0
-infoSeparator.Parent = contentFrame
-
+-- Info Labels (วางใต้ content)
 local targetLabel = Instance.new("TextLabel")
-targetLabel.Size = UDim2.new(1, -40, 0, 30)
+targetLabel.Position = UDim2.new(0, 10, 1, -90)
+targetLabel.Size = UDim2.new(1, -20, 0, 30)
 targetLabel.BackgroundTransparency = 1
 targetLabel.Text = "🎯 เป้าหมาย: ไม่มี"
 targetLabel.TextColor3 = Color3.fromRGB(200,200,220)
 targetLabel.Font = Enum.Font.Gotham
 targetLabel.TextXAlignment = Enum.TextXAlignment.Left
-targetLabel.Parent = contentFrame
+targetLabel.Parent = mainFrame
 
 local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(1, -40, 0, 30)
+speedLabel.Position = UDim2.new(0, 10, 1, -60)
+speedLabel.Size = UDim2.new(1, -20, 0, 30)
 speedLabel.BackgroundTransparency = 1
 speedLabel.Text = "⚡ ความเร็ว: 16"
 speedLabel.TextColor3 = Color3.fromRGB(200,200,220)
 speedLabel.Font = Enum.Font.Gotham
-speedLabel.Parent = contentFrame
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Parent = mainFrame
 
 local playersLabel = Instance.new("TextLabel")
-playersLabel.Size = UDim2.new(1, -40, 0, 30)
+playersLabel.Position = UDim2.new(0, 10, 1, -30)
+playersLabel.Size = UDim2.new(1, -20, 0, 30)
 playersLabel.BackgroundTransparency = 1
 playersLabel.Text = "👥 ผู้เล่น: " .. #Players:GetPlayers()
 playersLabel.TextColor3 = Color3.fromRGB(200,200,220)
 playersLabel.Font = Enum.Font.Gotham
-playersLabel.Parent = contentFrame
+playersLabel.TextXAlignment = Enum.TextXAlignment.Left
+playersLabel.Parent = mainFrame
 
 task.spawn(function()
     while task.wait(2) do
@@ -417,20 +424,23 @@ miniBtn.Size = UDim2.new(1,0,1,0)
 miniBtn.BackgroundTransparency = 1
 miniBtn.Parent = miniIcon
 
--- Collapse Logic
+-- Collapse
 local function toggleCollapse()
     isCollapsed = not isCollapsed
     if isCollapsed then
         collapseButton.Text = "▶"
-        tween(mainFrame, {Position = UDim2.new(0, -450, 0.5, -300)}, 0.4)
+        tween(mainFrame, {Size = UDim2.new(0,0,0,0), Position = UDim2.new(0,-850,0.5,-150)}, 0.4)
         task.wait(0.4)
         mainFrame.Visible = false
         miniIcon.Visible = true
+        tween(miniIcon, {Size = UDim2.new(0,60,0,60)}, 0.4)
     else
         collapseButton.Text = "◀"
+        tween(miniIcon, {Size = UDim2.new(0,0,0,0)}, 0.4)
+        task.wait(0.4)
         miniIcon.Visible = false
         mainFrame.Visible = true
-        tween(mainFrame, {Position = UDim2.new(0, 20, 0.5, -300)}, 0.4)
+        tween(mainFrame, {Size = UDim2.new(0,800,0,300), Position = UDim2.new(0.5,-400,0.5,-150)}, 0.4)
     end
 end
 
@@ -443,7 +453,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
     if input.KeyCode == Enum.KeyCode.F then toggleCollapse() end
 end)
 
--- ฟังก์ชันต่าง ๆ (เหมือนเดิม)
+-- Noclip
 local noclipConn
 noclipBtn.button.MouseButton1Click:Connect(function()
     noclipEnabled = not noclipEnabled
@@ -461,6 +471,7 @@ noclipBtn.button.MouseButton1Click:Connect(function()
     end
 end)
 
+-- ESP
 local highlights = {}
 local function updateESP()
     if espEnabled then
@@ -493,42 +504,46 @@ Players.PlayerAdded:Connect(function(p)
     end
 end)
 
-local fovCircle = Drawing.new("Circle")
-fovCircle.Radius = aimbotFOV
-fovCircle.Thickness = 2
-fovCircle.Color = Color3.fromRGB(0,255,150)
-fovCircle.Transparency = 0.6
-fovCircle.Visible = false
+-- Aimbot (แก้ใหม่: Toggle ด้วยคลิกขวา, ล็อกหัวโดยไม่ใช้ FOV circle)
+aimbotBtn.button.MouseButton1Click:Connect(function()
+    aimbotEnabled = not aimbotEnabled
+    aimbotBtn.toggle(aimbotEnabled)
+end)
+
+local aimbotLock = false
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
+        aimbotLock = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gp)
+    if gp then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aimbotLock = false
+    end
+end)
 
 local function getClosestHead()
     local closest = nil
-    local shortest = aimbotFOV
-    local mPos = Vector2.new(mouse.X, mouse.Y + 36)
+    local shortest = math.huge
+    local mPos = mouse.Hit.Position
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
             local head = p.Character.Head
-            local pos, visible = Camera:WorldToViewportPoint(head.Position)
-            if visible then
-                local dist = (Vector2.new(pos.X, pos.Y) - mPos).Magnitude
-                if dist < shortest then
-                    shortest = dist
-                    closest = head
-                end
+            local dist = (head.Position - mPos).Magnitude
+            if dist < shortest then
+                shortest = dist
+                closest = head
             end
         end
     end
     return closest
 end
 
-aimbotBtn.button.MouseButton1Click:Connect(function()
-    aimbotEnabled = not aimbotEnabled
-    aimbotBtn.toggle(aimbotEnabled)
-    fovCircle.Visible = aimbotEnabled
-end)
-
 RunService.RenderStepped:Connect(function()
-    if aimbotEnabled then
-        fovCircle.Position = Vector2.new(mouse.X, mouse.Y + 36)
+    if aimbotEnabled and aimbotLock then
         local targetHead = getClosestHead()
         if targetHead then
             Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, targetHead.Position), 1 / aimbotSmooth)
@@ -541,6 +556,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- Speed
 speedBtn.button.MouseButton1Click:Connect(function()
     speedEnabled = not speedEnabled
     speedBtn.toggle(speedEnabled)
@@ -551,6 +567,7 @@ speedBtn.button.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Invisible
 invisibleBtn.button.MouseButton1Click:Connect(function()
     invisibleEnabled = not invisibleEnabled
     invisibleBtn.toggle(invisibleEnabled)
@@ -594,6 +611,7 @@ player.CharacterAdded:Connect(function(char)
     end
 end)
 
+-- Bring
 bringBtn.button.MouseButton1Click:Connect(function()
     bringEnabled = not bringEnabled
     bringBtn.toggle(bringEnabled)
@@ -610,6 +628,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+-- Kill All
 killAllBtn.button.MouseButton1Click:Connect(function()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
@@ -622,13 +641,14 @@ killAllBtn.button.MouseButton1Click:Connect(function()
     killAllBtn.status.TextColor3 = Color3.fromRGB(255, 100, 100)
 end)
 
+-- Wallbang
 wallbangBtn.button.MouseButton1Click:Connect(function()
     wallbangEnabled = not wallbangEnabled
     wallbangBtn.toggle(wallbangEnabled)
 end)
 
 RunService.Heartbeat:Connect(function()
-    if wallbangEnabled then
+    if wallbangEnabled and player.Character then
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("BasePart") and (obj.Material == Enum.Material.Concrete or obj.Material == Enum.Material.Brick or obj.Material == Enum.Material.Wood or obj.Material == Enum.Material.Metal) and obj.CanCollide then
                 obj.CanCollide = false
@@ -637,10 +657,30 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Teleport Menu (เหมือนเดิม)
+-- No Reload (Infinite Ammo / No Reload)
+noReloadBtn.button.MouseButton1Click:Connect(function()
+    noReloadEnabled = not noReloadEnabled
+    noReloadBtn.toggle(noReloadEnabled)
+end)
+
+RunService.Heartbeat:Connect(function()
+    if noReloadEnabled and player.Character then
+        local tool = player.Character:FindFirstChildOfClass("Tool")
+        if tool then
+            -- Assume the tool has Ammo or Clip script, set to max
+            for _, v in pairs(tool:GetDescendants()) do
+                if v:IsA("IntValue") and (v.Name == "Ammo" or v.Name == "Clip") then
+                    v.Value = math.huge
+                end
+            end
+        end
+    end
+end)
+
+-- Teleport Menu
 local tpMenu = Instance.new("Frame")
 tpMenu.Size = UDim2.new(0, 250, 0, 300)
-tpMenu.Position = UDim2.new(0.5, -125, 0.5, -150)
+tpMenu.Position = UDim2.new(0.5, 155, 0.5, -150)
 tpMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 tpMenu.Visible = false
 tpMenu.Parent = screenGui
@@ -738,6 +778,6 @@ local function notify(text, dur)
     n:Destroy()
 end
 
-notify("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ!\nUI ใหม่สวยงาม เรียบร้อย\nกด F เพื่อพับ/กางเมนู", 6)
+notify("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ!\n- แก้ Aimbot: กดคลิกขวาเพื่อล็อกหัว\n- เพิ่ม No Reload\n- UI แนวนอนสวยๆ\nกด F เพื่อพับ UI", 6)
 
-print("🇹🇭 Thai Exploit Premium v2.5 (Fixed UI) - โหลดสำเร็จ 100% (01 ม.ค. 2026)")
+print("🇹🇭 Thai Exploit Premium v2.5 โหลดสำเร็จ - พร้อมรัน 100% (31 ธ.ค. 2025)")
